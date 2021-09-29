@@ -30,6 +30,28 @@ To start the app just run:
 npm run dev
 ```
 
+## Addming Models
+
+### Add model to models fodler
+
+Follow TypeOrm decoartos
+
+### Create migration
+
+Run the following command, where `<<Model>>` is the name of the models you have changed or created.
+
+```bash
+    npm run typeorm migration:generate -- -n <<Model>>
+```
+
+### Run Migrations
+
+To run migrations excecute
+
+```bash
+    npm run migrations
+```
+
 ## Troubelshooting
 
 ### Backend: Error (auth/configuration-not-found)

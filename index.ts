@@ -1,29 +1,69 @@
-import express, { Application, Request, Response } from "express";
+#!/usr/bin/env node
 
-const app: Application = express();
-const port = 3000;
+/**
+ * Module dependencies.
+ */
 
-// Body parsing Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+import app from './src/app';
+import { intializeDB } from './src/config/db';
+const cluster = require('cluster');
+const config = require('./src/config/config');
+const logger = require('./src/config/logger');
 
-app.get(
-    "/",
-    async (req: Request, res: Response): Promise<Response> => {
-        return res.status(200).send({
-            message: "Hello World!",
-        });
-    }
-);
+/**
+ * Handle clusters configuration
+ */
 
-try {
-    app.listen(port, (): void => {
-        console.log(`Connected successfully on port ${port}`);
-    });
-} catch (error) {
-    let errorMessage = "Failed to do something exceptional";
-    if (error instanceof Error) {
-        errorMessage = error.message;
-    }
-    console.error(`Error occured: ${errorMessage}`);
+var workers: any = {};
+var count = 1;
+if(config.env === 'production') {
+  count = require('os').cpus().length;
+}
+
+/** 
+ * Services Initialization
+ */
+intializeDB();
+require('./src/config/firebase').firebase_connect();
+
+/**
+ * Create HTTP server.
+ */
+
+if (cluster.isMaster) {
+  for (var i = 0; i < count; i++) {
+    spawn();
+  }
+} else {
+  let server = app.listen(config.port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+}
+
+/**
+ * Workers creation funciton
+ */
+
+function spawn() {
+  var worker = cluster.fork();
+  workers[worker.pid] = worker;
+  return worker;
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  logger.info(`Listening to port ${config.port}`);
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error: any) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
 }
