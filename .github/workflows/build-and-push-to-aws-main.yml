@@ -7,7 +7,7 @@ on:
     branches:
       - 'main'
 jobs:
-  build_and_preview:
+  build_and_deploy_alpha:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -25,7 +25,10 @@ jobs:
           pip3 install awsebcli --user --upgrade
           echo "${HOME}/.local/bin" >> $GITHUB_PATH 
       - name: Build
-        run: npm run build && npm run copy-files
+        run: |
+          npm install
+          npm run build
+          npm run copy-files
       - name: Deploy
         working-directory: ./dist
         run: eb deploy 
