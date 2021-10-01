@@ -67,3 +67,14 @@ first
 Local Environment:
 Local Mongo
 use dontenv for env variables describing all config values
+
+ 1026  //start here
+ 1027  npm run build
+ 1028  cp package.json ./dist/
+ 1029  cp ormconfig.js ./dist/
+ 1030  cp .env ./dist/
+ 1031  cd dist/
+ 1032  npm install --only production
+ 1033  npm raun start:prod
+ 1034  npm run migrations
+ 1035  npm run start:p
