@@ -73,7 +73,7 @@ const login = catchAsync(async (req: any, res: any) => {
   if (!currentUser) {
     throw new ApiError(
       httpStatus.NOT_FOUND,
-      "The user with email `${email}` is not registerd"
+      "The user with email " + email + " is not registerd"
     );
   }
 
@@ -83,7 +83,16 @@ const login = catchAsync(async (req: any, res: any) => {
       token = userCredential.user.accessToken;
     })
     .catch((error: any) => {
-      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+      let code = httpStatus.INTERNAL_SERVER_ERROR;
+      let message = error.message;
+      if (error.code === "auth/wrong-password") {
+        code = httpStatus.UNAUTHORIZED;
+        message = error.message;
+      } else if (error.code === "auth/too-many-requests") {
+        code = httpStatus.TOO_MANY_REQUESTS;
+        message = error.message;
+      }
+      throw new ApiError(code, error.message);
     });
 
   if (token === "")
