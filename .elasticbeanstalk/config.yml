@@ -3,6 +3,8 @@ branch-defaults:
     environment: Pronoia-env
   build:
     environment: Pronoia-env
+  live:
+    environment: Pronoia-env
 environment-defaults:
   Pronoia-env:
     branch: null
