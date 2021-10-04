@@ -9,7 +9,6 @@ const catchAsync = require("../utils/catchAsync");
 const ApiError = require("../utils/ApiError");
 const pick = require("../utils/pick");
 
-import { isError } from "joi";
 /** Schemas */
 import { User } from "../models/User";
 

@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, OneToMany, Column, BaseEntity } from "typeorm";
+import { Workbook } from "./Workbooks";
 
 @Entity()
 export class User extends BaseEntity {
@@ -23,5 +24,8 @@ export class User extends BaseEntity {
 
     @Column({length: 100})
     country: string;
+
+    @OneToMany(() => Workbook, workbook => workbook.author)
+    workbooks: Workbook[];
 
 }
