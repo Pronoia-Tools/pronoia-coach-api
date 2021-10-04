@@ -13,9 +13,10 @@ const pick = require('../utils/pick');
 import { Workbook } from "../models/Workbooks";
 
 
-// const get = async (req, res) => {
-
-// }
+const get = catchAsync(async (req: any, res: any) => {
+  const selectedWorkbook = await Workbook.findOne({ id: req.params.id});
+  res.status(httpStatus.OK).json({ selectedWorkbook });
+});
 
 const post = catchAsync(async (req: any, res: any) => {
   let { title, published, edition, language, price, currency, status, tags, description } = req.body;
@@ -36,11 +37,11 @@ const post = catchAsync(async (req: any, res: any) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
 
-  res.status(httpStatus.OK).json({ workbook });
+  res.status(httpStatus.OK).json(workbook);
 
 });
   
 module.exports = {
-  // get,
+  get,
   post
 };
