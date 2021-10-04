@@ -13,6 +13,14 @@ import { isError } from "joi";
 /** Schemas */
 import { User } from "../models/User";
 
+// const getToken = (email: string, password: string) => {
+//   let token = "";
+  
+
+//     return token;
+// }
+
+
 const register = catchAsync(async (req: any, res: any) => {
   let body = req.body;
   let { firstname, lastname, email, password, country } = body;
@@ -61,8 +69,34 @@ const register = catchAsync(async (req: any, res: any) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
 
+  let token = "";
+  await signInWithEmailAndPassword(getAuth(), email, password)
+    .then((userCredential: any) => {
+      token = userCredential.user.accessToken;
+
+    })
+    .catch((error: any) => {
+      let code = httpStatus.INTERNAL_SERVER_ERROR;
+      let message = error.message;
+      if (error.code === "auth/wrong-password") {
+        code = httpStatus.UNAUTHORIZED;
+        message = error.message;
+      } else if (error.code === "auth/too-many-requests") {
+        code = httpStatus.TOO_MANY_REQUESTS;
+        message = error.message;
+      }
+      throw new ApiError(code, error.message);
+    });
+
+  if (token === "")
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "Could not retrieve token."
+    );
+
   res.status(httpStatus.OK).json({
     user: pick(user, ["id", "firstName", "lastName", "email", "country"]),
+    token: token,
   });
 });
 
