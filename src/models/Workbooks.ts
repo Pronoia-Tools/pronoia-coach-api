@@ -4,10 +4,11 @@ import {
   ManyToOne,
   Column,
   BaseEntity,
-  OneToMany,
+  ManyToMany,
+  JoinTable,
 } from "typeorm";
 import { User } from "./User";
-import { Question } from "./Questions";
+import { Unit } from "./Unit";
 
 @Entity()
 export class Workbook extends BaseEntity {
@@ -41,10 +42,7 @@ export class Workbook extends BaseEntity {
   @Column({ type: "text" })
   description: string;
 
-  @Column({ length: 100 })
-  tags: "";
-
-  //QUESTIONS QUE IRIA PARA EL MODEL DE UNITS PERO POR AHORA PARA TESTEAR  LO METI POR AQUI :D
-  @OneToMany(() => Question, (question) => question.question)
-  questions: Question[];
+  @ManyToMany(() => Unit)
+  @JoinTable()
+  units: Unit[];
 }

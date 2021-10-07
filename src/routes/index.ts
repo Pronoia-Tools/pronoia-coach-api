@@ -7,6 +7,7 @@ const config = require("../config/config");
 const authRoute = require("./auth.route");
 const workbookRoute = require("./workbook.route");
 const questionsRoute = require("./questions.route");
+const unitRoute = require("./unit.route");
 
 // Create routing
 const defaultRoutes = [
@@ -18,6 +19,10 @@ const defaultRoutes = [
     path: "/workbook",
     route: workbookRoute,
   },
+  // {
+  //   path: '/unit',
+  //   route: unitRoute,
+  // },
   {
     path: "/questions",
     route: questionsRoute,
