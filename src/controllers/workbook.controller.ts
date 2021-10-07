@@ -73,16 +73,6 @@ const put = catchAsync(async (req: any, res: any) => {
 
   let { title, published, edition, language, price, currency, status, tags, description } = req.body;
 
-// UNITS
-const getUnitAll = catchAsync(async (req: any, res: any) => {
-  const selectedWorkbook = await Workbook.findOne({ 
-    where: {
-      author: req.currentUser,
-      id: req.params.id
-    },
-    relations: ['units']
-  });
-  
   selectedWorkbook.title = title;
   selectedWorkbook.published = published;
   selectedWorkbook.edition = edition;
@@ -130,6 +120,28 @@ const remove = catchAsync(async (req: any, res: any) => {
 
 });
 
+// UNITS
+const getUnitAll = catchAsync(async (req: any, res: any) => {
+  const selectedWorkbook = await Workbook.findOne({ 
+    where: {
+      author: req.currentUser,
+      id: req.params.id
+    },
+    relations: ['units']
+  });
+  
+  if(!selectedWorkbook)
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "The workbook does not exist"
+    );
+
+  if (req.currentUser.id != selectedWorkbook.author.id)
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "You need to be the author to edit"
+    );
+
   res.status(httpStatus.OK).json(selectedWorkbook);
 });
 
@@ -140,6 +152,5 @@ module.exports = {
   put,
   post,
   remove,
-  post,
   getUnitAll
 };
