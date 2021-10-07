@@ -72,6 +72,16 @@ const put = catchAsync(async (req: any, res: any) => {
     );
 
   let { title, published, edition, language, price, currency, status, tags, description } = req.body;
+
+// UNITS
+const getUnitAll = catchAsync(async (req: any, res: any) => {
+  const selectedWorkbook = await Workbook.findOne({ 
+    where: {
+      author: req.currentUser,
+      id: req.params.id
+    },
+    relations: ['units']
+  });
   
   selectedWorkbook.title = title;
   selectedWorkbook.published = published;
@@ -120,10 +130,16 @@ const remove = catchAsync(async (req: any, res: any) => {
 
 });
 
+  res.status(httpStatus.OK).json(selectedWorkbook);
+});
+
+
 module.exports = {
   getAll,
   get,
   put,
   post,
   remove,
+  post,
+  getUnitAll
 };

@@ -6,6 +6,7 @@ const config = require('../config/config');
 // Import routes
 const authRoute = require('./auth.route');
 const workbookRoute = require('./workbook.route');
+const unitRoute = require('./unit.route');
 
 // Create routing
 const defaultRoutes = [
@@ -17,6 +18,10 @@ const defaultRoutes = [
       path: '/workbook',
       route: workbookRoute,
     },
+    // {
+    //   path: '/unit',
+    //   route: unitRoute,
+    // },
   ];
   
 const devRoutes: any[] = [

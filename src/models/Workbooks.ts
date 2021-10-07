@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, BaseEntity } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, BaseEntity, ManyToMany, JoinTable } from "typeorm";
 import { User } from './User'
+import { Unit } from './Unit'
 
 @Entity()
 export class Workbook extends BaseEntity {
@@ -37,7 +38,9 @@ export class Workbook extends BaseEntity {
     @Column({length: 100})
     tags:""
 
-
+    @ManyToMany(() => Unit)
+    @JoinTable()
+    units: Unit[];
 
 
 }
