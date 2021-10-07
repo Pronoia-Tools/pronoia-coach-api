@@ -42,6 +42,9 @@ export class Workbook extends BaseEntity {
   @Column({ type: "text" })
   description: string;
 
+  @Column({ length: 100 })
+  tags: "";
+
   @ManyToMany(() => Unit)
   @JoinTable()
   units: Unit[];
