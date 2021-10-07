@@ -10,13 +10,13 @@ const ApiError = require("../utils/ApiError");
 import { Question } from "../models/Questions";
 
 const getAll = catchAsync(async (req: any, res: any) => {
-  const selectedWorkbooks = await Question.find({
+  const selectedQuestions = await Question.find({
     where: {
-      workbook: req.body.workbookId,
+      unit: req.body.unit,
     },
-    relations: ["workbook"],
+    relations: ["unit"],
   });
-  res.status(httpStatus.OK).json(selectedWorkbooks);
+  res.status(httpStatus.OK).json(selectedQuestions);
 });
 
 const get = catchAsync(async (req: any, res: any) => {
@@ -25,15 +25,15 @@ const get = catchAsync(async (req: any, res: any) => {
 });
 
 const post = catchAsync(async (req: any, res: any) => {
-  let { question, answer, workbookId } = req.body;
+  let { question, answer, unit } = req.body;
 
-  if (!question || !workbookId) {
+  if (!question || !unit) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Missing field");
   }
   const sendQuestion = new Question();
   sendQuestion.question = question;
   sendQuestion.answer = answer;
-  sendQuestion.workbook = workbookId;
+  sendQuestion.unit = unit;
 
   await sendQuestion.save().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
@@ -43,18 +43,26 @@ const post = catchAsync(async (req: any, res: any) => {
 });
 
 const put = catchAsync(async (req: any, res: any) => {
-  let { question, answer, workbookId } = req.body;
-  console.log(req);
-  const sendQuestion = new Question();
-  sendQuestion.question = question;
-  sendQuestion.answer = answer;
-  sendQuestion.workbook = workbookId;
+  const selectedQuestion = await Question.findOne({
+    where: {
+      unit: req.body.unit,
+    },
+    relations: ["unit"],
+  });
 
-  await sendQuestion.save().catch((error) => {
+  if (!selectedQuestion)
+    throw new ApiError(httpStatus.BAD_REQUEST, "The question does not exist");
+
+  let { question, answer } = req.body;
+
+  selectedQuestion.question = question;
+  selectedQuestion.answer = answer;
+
+  let updatedQuestion = await selectedQuestion.save().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
 
-  res.status(httpStatus.OK).json(sendQuestion);
+  res.status(httpStatus.OK).json(updatedQuestion);
 });
 
 const remove = catchAsync(async (req: any, res: any) => {

@@ -13,7 +13,7 @@ export class Question extends BaseEntity {
   id: number;
 
   @ManyToOne(() => Unit, (unit) => unit.questions)
-  workbook: Unit[];
+  unit: Unit[];
 
   @Column({ length: 100 })
   question: string;
