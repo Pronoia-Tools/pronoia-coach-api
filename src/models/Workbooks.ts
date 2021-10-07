@@ -44,6 +44,7 @@ export class Workbook extends BaseEntity {
   @Column({ length: 100 })
   tags: "";
 
+  //QUESTIONS QUE IRIA PARA EL MODEL DE UNITS PERO POR AHORA PARA TESTEAR  LO METI POR AQUI :D
   @OneToMany(() => Question, (question) => question.question)
   questions: Question[];
 }

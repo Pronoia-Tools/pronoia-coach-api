@@ -9,14 +9,27 @@ const ApiError = require("../utils/ApiError");
 /** Schemas */
 import { Question } from "../models/Questions";
 
+const getAll = catchAsync(async (req: any, res: any) => {
+  const selectedWorkbooks = await Question.find({
+    where: {
+      workbook: req.body.workbookId,
+    },
+    relations: ["workbook"],
+  });
+  res.status(httpStatus.OK).json(selectedWorkbooks);
+});
+
 const get = catchAsync(async (req: any, res: any) => {
-  const selectedWorkbook = await Question.findOne({ id: req.params.id });
-  res.status(httpStatus.OK).json({ selectedWorkbook });
+  const selectedQuestion = await Question.findOne({ id: req.params.id });
+  res.status(httpStatus.OK).json({ selectedQuestion });
 });
 
 const post = catchAsync(async (req: any, res: any) => {
   let { question, answer, workbookId } = req.body;
-  //console.log(req);
+
+  if (!question || !workbookId) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Missing field");
+  }
   const sendQuestion = new Question();
   sendQuestion.question = question;
   sendQuestion.answer = answer;
@@ -45,14 +58,26 @@ const put = catchAsync(async (req: any, res: any) => {
 });
 
 const remove = catchAsync(async (req: any, res: any) => {
-  Question.delete({ id: req.params.id }).catch((error) => {
+  const selectedQuestion = await Question.findOne({
+    where: {
+      id: req.params.id,
+    },
+  });
+
+  if (!selectedQuestion)
+    throw new ApiError(httpStatus.BAD_REQUEST, "The question does not exist");
+
+  let removedQuestion = await selectedQuestion.remove().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
-  res.status(httpStatus.OK).json("deleted");
+  removedQuestion.id = Number(req.params.id);
+  res.status(httpStatus.OK).json(removedQuestion);
 });
 
 module.exports = {
   get,
+  getAll,
   post,
+  put,
   remove,
 };
