@@ -5,15 +5,15 @@ import {
   Column,
   BaseEntity,
 } from "typeorm";
-import { Workbook } from "./Workbooks";
+import { Unit } from "./Unit";
 
 @Entity()
 export class Question extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Workbook, (workbook) => workbook.questions)
-  workbook: Workbook[];
+  @ManyToOne(() => Unit, (unit) => unit.questions)
+  workbook: Unit[];
 
   @Column({ length: 100 })
   question: string;

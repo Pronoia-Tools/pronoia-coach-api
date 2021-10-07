@@ -1,16 +1,24 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, BaseEntity } from "typeorm";
-import { User } from './User'
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BaseEntity,
+  OneToMany,
+} from "typeorm";
+import { User } from "./User";
+import { Question } from "./Questions";
 
 @Entity()
 export class Unit extends BaseEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @PrimaryGeneratedColumn()
-    id: number;
+  @Column({ length: 100 })
+  name: string;
 
-    @Column({length: 100})
-    name: string;
+  @Column("json", { nullable: false, default: {} })
+  contents: object;
 
-    @Column('json', { nullable: false, default: {} })
-    contents: object;
-
+  @OneToMany(() => Question, (question) => question.question)
+  questions: Question[];
 }
