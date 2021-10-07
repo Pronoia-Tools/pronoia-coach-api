@@ -49,9 +49,73 @@ const post = catchAsync(async (req: any, res: any) => {
   res.status(httpStatus.OK).json(workbook);
 
 });
+
+const put = catchAsync(async (req: any, res: any) => {
+
+  let id = req.params.id;
+
+  const selectedWorkbook = await Workbook.findOne({ id: id});
+
+    if(selectedWorkbook)
+
+    if (req.currentUser.email != selectedWorkbook.author.email)
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "You need to be the author to edit"
+    );
+
+  let { title, published, edition, language, price, currency, status, tags, description } = req.body;
   
+  let updateWorkbook = {
+    title,
+    published, 
+    edition, 
+    language, 
+    price, 
+    currency, 
+    status, 
+    tags, 
+    description
+};
+
+await Workbook.update(id, updateWorkbook)
+
+  .catch((error) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  });
+
+  res.status(httpStatus.OK).json(updateWorkbook);
+});
+  
+
+const remove = catchAsync(async (req: any, res: any) => {
+
+  let id = req.params.id;
+
+  const selectedWorkbook = await Workbook.findOne({ id: id});
+
+    if(selectedWorkbook){
+      if (req.currentUser.email != selectedWorkbook.author.email)
+      throw new ApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "You need to be the author to edit"
+      );
+  
+    const removedWorkbook = await Workbook.delete({ id: req.params.id});
+    res.status(httpStatus.OK).json({ removedWorkbook });
+    }
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "This workbook not exist"
+    );
+
+
+});
+
 module.exports = {
   getAll,
   get,
-  post
+  put,
+  post,
+  remove,
 };
