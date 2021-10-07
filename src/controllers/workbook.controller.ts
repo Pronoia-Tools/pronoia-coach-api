@@ -12,6 +12,15 @@ const pick = require('../utils/pick');
 /** Schemas */
 import { Workbook } from "../models/Workbooks";
 
+const getAll = catchAsync(async (req: any, res: any) => {
+  const selectedWorkbooks = await Workbook.find({ 
+    where: {
+      author: req.currentUser
+    },
+    relations: ['author']
+  });
+  res.status(httpStatus.OK).json(selectedWorkbooks);
+});
 
 const get = catchAsync(async (req: any, res: any) => {
   const selectedWorkbook = await Workbook.findOne({ id: req.params.id});
@@ -40,8 +49,81 @@ const post = catchAsync(async (req: any, res: any) => {
   res.status(httpStatus.OK).json(workbook);
 
 });
+
+const put = catchAsync(async (req: any, res: any) => {
+
+  const selectedWorkbook = await Workbook.findOne({
+    where: {
+      id: req.params.id
+    },
+    relations: ['author']
+  });
+
+  if(!selectedWorkbook)
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "The workbook does not exist"
+    );
+
+  if (req.currentUser.id != selectedWorkbook.author.id)
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "You need to be the author to edit"
+    );
+
+  let { title, published, edition, language, price, currency, status, tags, description } = req.body;
   
+  selectedWorkbook.title = title;
+  selectedWorkbook.published = published;
+  selectedWorkbook.edition = edition;
+  selectedWorkbook.language = language;
+  selectedWorkbook.price = price;
+  selectedWorkbook.currency = currency;
+  selectedWorkbook.status = status;
+  selectedWorkbook.tags = tags;
+  selectedWorkbook.description = description;
+ 
+  let updatedWorkbook = await selectedWorkbook.save().catch((error) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  });
+
+  res.status(httpStatus.OK).json(updatedWorkbook);
+});
+  
+
+const remove = catchAsync(async (req: any, res: any) => {
+
+  const selectedWorkbook = await Workbook.findOne({
+    where: {
+      id: req.params.id
+    },
+    relations: ['author']
+  });
+
+  if(!selectedWorkbook)
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "The workbook does not exist"
+    );
+
+  if (req.currentUser.id != selectedWorkbook.author.id)
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "You need to be the author to edit"
+    );
+  
+  let removedWorkbook = await selectedWorkbook.remove().catch((error) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  });
+  removedWorkbook.id = Number(req.params.id);
+  res.status(httpStatus.OK).json(removedWorkbook);
+
+});
+
 module.exports = {
+  getAll,
   get,
-  post
+  put,
+  post,
+  remove,
 };
