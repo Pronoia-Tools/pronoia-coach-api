@@ -1,23 +1,23 @@
 import {
   Entity,
   PrimaryGeneratedColumn,
-  ManyToMany,
+  ManyToOne,
   Column,
   BaseEntity,
 } from "typeorm";
-import { User } from "./User";
+import { Workbook } from "./Workbooks";
 
 @Entity()
 export class Question extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToMany(() => User, (user) => user.workbooks)
-  author: User;
+  @ManyToOne(() => Workbook, (workbook) => workbook.questions)
+  workbook: Workbook[];
 
   @Column({ length: 100 })
   question: string;
 
-  @Column({ length: 100 })
+  @Column({ length: 100, nullable: true })
   answer: string;
 }

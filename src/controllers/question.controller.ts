@@ -15,11 +15,12 @@ const get = catchAsync(async (req: any, res: any) => {
 });
 
 const post = catchAsync(async (req: any, res: any) => {
-  let { question } = req.body;
-
+  let { question, answer, workbookId } = req.body;
+  //console.log(req);
   const sendQuestion = new Question();
   sendQuestion.question = question;
-  sendQuestion.author = req.currentUser;
+  sendQuestion.answer = answer;
+  sendQuestion.workbook = workbookId;
 
   await sendQuestion.save().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
@@ -28,7 +29,30 @@ const post = catchAsync(async (req: any, res: any) => {
   res.status(httpStatus.OK).json(sendQuestion);
 });
 
+const put = catchAsync(async (req: any, res: any) => {
+  let { question, answer, workbookId } = req.body;
+  console.log(req);
+  const sendQuestion = new Question();
+  sendQuestion.question = question;
+  sendQuestion.answer = answer;
+  sendQuestion.workbook = workbookId;
+
+  await sendQuestion.save().catch((error) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  });
+
+  res.status(httpStatus.OK).json(sendQuestion);
+});
+
+const remove = catchAsync(async (req: any, res: any) => {
+  Question.delete({ id: req.params.id }).catch((error) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  });
+  res.status(httpStatus.OK).json("deleted");
+});
+
 module.exports = {
   get,
   post,
+  remove,
 };
