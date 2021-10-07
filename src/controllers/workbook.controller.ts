@@ -13,6 +13,9 @@ const pick = require('../utils/pick');
 import { Workbook } from "../models/Workbooks";
 import { Unit } from "../models/Unit";
 
+/** Sample data */
+const unit = require('../utils/sampleUnit');
+
 const getAll = catchAsync(async (req: any, res: any) => {
   const selectedWorkbooks = await Workbook.find({ 
     where: {
@@ -91,7 +94,6 @@ const put = catchAsync(async (req: any, res: any) => {
   res.status(httpStatus.OK).json(updatedWorkbook);
 });
   
-
 const remove = catchAsync(async (req: any, res: any) => {
 
   const selectedWorkbook = await Workbook.findOne({
@@ -146,6 +148,7 @@ const getUnitAll = catchAsync(async (req: any, res: any) => {
   if (selectedWorkbook.units.length === 0) {
     const firstUnit = new Unit();
     firstUnit.name = "First Unit";
+    firstUnit.contents = unit;
 
     await firstUnit.save().catch((error) => {
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
@@ -158,12 +161,51 @@ const getUnitAll = catchAsync(async (req: any, res: any) => {
     });
   }
   
-  console.log(selectedWorkbook);
-  console.log(selectedWorkbook.units)
-  
   res.status(httpStatus.OK).json(selectedWorkbook);
 });
 
+const putUnit = catchAsync(async (req: any, res: any) => {
+
+  const selectedWorkbook = await Workbook.findOne({ 
+    where: {
+      author: req.currentUser,
+      id: req.params.workbookId
+    },
+    relations: ['author', 'units']
+  });
+
+  if(!selectedWorkbook)
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "The workbook does not exist"
+    );
+
+  if (req.currentUser.id != selectedWorkbook.author.id)
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "You need to be the author to edit"
+    );
+
+  let selectedUnit = selectedWorkbook.units.find(x => x.id === Number(req.params.unitId));
+
+  if(!selectedUnit)
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "The workbook does not have the unit"
+    );
+
+  let { name, contents } = req.body;
+
+  selectedUnit.name = name;
+  selectedUnit.contents = contents;
+ 
+  let updatedUnit = await selectedUnit.save().catch((error) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  });
+
+  res.status(httpStatus.OK).json(updatedUnit);
+});
+  
 
 module.exports = {
   getAll,
@@ -171,5 +213,6 @@ module.exports = {
   put,
   post,
   remove,
-  getUnitAll
+  getUnitAll,
+  putUnit
 };
