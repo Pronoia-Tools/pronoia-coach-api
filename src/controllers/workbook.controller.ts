@@ -13,8 +13,12 @@ const pick = require('../utils/pick');
 import { Workbook } from "../models/Workbooks";
 
 const getAll = catchAsync(async (req: any, res: any) => {
-  const selectedWorkbooks = await Workbook.find({ author: req.currentUser});
-  console.log(selectedWorkbooks);
+  const selectedWorkbooks = await Workbook.find({ 
+    where: {
+      author: req.currentUser
+    },
+    relations: ['author']
+  });
   res.status(httpStatus.OK).json(selectedWorkbooks);
 });
 
