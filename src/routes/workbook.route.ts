@@ -11,6 +11,6 @@ router.put('/:id', auth(), workbookController.put);
 router.delete('/:id', auth(), workbookController.remove);
 // router.post('/login', validate(authValidation.login), authController.login);
 // router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
-router.get('/:id/unit', auth(), workbookController.getUnitAll);
+router.get('/:workbookId/unit', auth(), workbookController.getUnitAll);
 
 module.exports = router;

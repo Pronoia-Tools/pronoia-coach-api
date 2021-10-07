@@ -11,6 +11,7 @@ const pick = require('../utils/pick');
 
 /** Schemas */
 import { Workbook } from "../models/Workbooks";
+import { Unit } from "../models/Unit";
 
 const getAll = catchAsync(async (req: any, res: any) => {
   const selectedWorkbooks = await Workbook.find({ 
@@ -125,9 +126,9 @@ const getUnitAll = catchAsync(async (req: any, res: any) => {
   const selectedWorkbook = await Workbook.findOne({ 
     where: {
       author: req.currentUser,
-      id: req.params.id
+      id: req.params.workbookId
     },
-    relations: ['units']
+    relations: ['author', 'units']
   });
   
   if(!selectedWorkbook)
@@ -142,6 +143,24 @@ const getUnitAll = catchAsync(async (req: any, res: any) => {
       "You need to be the author to edit"
     );
 
+  if (selectedWorkbook.units.length === 0) {
+    const firstUnit = new Unit();
+    firstUnit.name = "First Unit";
+
+    await firstUnit.save().catch((error) => {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+    });
+
+    selectedWorkbook.units.push(firstUnit);
+
+    await selectedWorkbook.save().catch((error) => {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+    });
+  }
+  
+  console.log(selectedWorkbook);
+  console.log(selectedWorkbook.units)
+  
   res.status(httpStatus.OK).json(selectedWorkbook);
 });
 
