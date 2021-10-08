@@ -48,4 +48,10 @@ if (config.env === "development") {
   });
 }
 
+if (config.version) {
+  router.get('/version', function (req, res) {
+    res.send()
+  })
+}
+
 module.exports = router;
