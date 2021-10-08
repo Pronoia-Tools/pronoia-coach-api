@@ -7,7 +7,7 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 const envVarsSchema = Joi.object()
   .keys({
     NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
-    VERSION: Joi.string().default('NON_GIVEN').required().description('DB Port'),
+    VERSION: Joi.string().default('NON_GIVEN').description('API Version'),
     PORT: Joi.number().default(3000),
     DB_TYPE: Joi.string().valid('sqlite', 'sqlite3', 'postgres').required().description('DB Type'),
     DB_HOST: Joi.string().default('./database.sqlite').required().description('DB Host'),
