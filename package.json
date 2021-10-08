@@ -36,9 +36,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -p .",
     "start": "npm run migrations && node ./index.js",
-    "copy-files:prod": "cp package.json ./dist/ && sed 's,\\.ts,\\.js,g' ormconfig.js >> ./dist/ormconfig.js && mkdir ./dist/.elasticbeanstalk/ && sed 's,us-east-1,us-west-2,g' .elasticbeanstalk/config.yml >> ./dist/.elasticbeanstalk/config.yml && cp .ebignore ./dist/ && cp .npmrc ./dist/  && npm run add-env",
-    "copy-files": "cp package.json ./dist/ && sed 's,\\.ts,\\.js,g' ormconfig.js >> ./dist/ormconfig.js && cp -r .elasticbeanstalk/ ./dist/ && cp .ebignore ./dist/ && cp .npmrc ./dist/ && npm run add-env",
-    "add-env": "echo \"VERSION=`date +%Y%m%d-%H:%M:%S`-${GITHUB_SHA}\" >> ./dist/.env.aws"
+    "copy-files:prod": "cp package.json ./dist/ && sed 's,\\.ts,\\.js,g' ormconfig.js >> ./dist/ormconfig.js && mkdir ./dist/.elasticbeanstalk/ && sed 's,us-east-1,us-west-2,g' .elasticbeanstalk/config.yml >> ./dist/.elasticbeanstalk/config.yml && sed 's,.env,,g' .ebignore >> ./dist/.ebignore && cp .npmrc ./dist/  && npm run add-env",
+    "copy-files": "cp package.json ./dist/ && sed 's,\\.ts,\\.js,g' ormconfig.js >> ./dist/ormconfig.js && cp -r .elasticbeanstalk/ ./dist/ && sed 's,.env,,g' .ebignore >> ./dist/.ebignore && cp .npmrc ./dist/ && npm run add-env",
+    "add-env": "echo \"VERSION=`date +%Y%m%d-%H:%M:%S`-${GITHUB_SHA}\" >> ./dist/.env"
   },
   "repository": {
     "type": "git",
