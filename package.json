@@ -38,7 +38,7 @@
     "start": "npm run migrations && node ./index.js",
     "copy-files:prod": "cp package.json ./dist/ && sed 's,\\.ts,\\.js,g' ormconfig.js >> ./dist/ormconfig.js && mkdir ./dist/.elasticbeanstalk/ && sed 's,us-east-1,us-west-2,g' .elasticbeanstalk/config.yml >> ./dist/.elasticbeanstalk/config.yml && cp .ebignore ./dist/ && cp .npmrc ./dist/  && npm run add-env",
     "copy-files": "cp package.json ./dist/ && sed 's,\\.ts,\\.js,g' ormconfig.js >> ./dist/ormconfig.js && cp -r .elasticbeanstalk/ ./dist/ && cp .ebignore ./dist/ && cp .npmrc ./dist/ && npm run add-env",
-    "add-env": "echo \"VERSION=`date +%Y%m%d-%H:%M:%S`-${GITHUB_SHA}\" >> ./dist/.env"
+    "add-env": "echo \"VERSION=`date +%Y%m%d-%H:%M:%S`-${GITHUB_SHA}\" >> ./dist/.env.aws"
   },
   "repository": {
     "type": "git",
