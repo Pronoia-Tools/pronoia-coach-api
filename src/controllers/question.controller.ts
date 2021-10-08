@@ -32,7 +32,6 @@ const post = catchAsync(async (req: any, res: any) => {
   }
   const sendQuestion = new Question();
   sendQuestion.question = question;
-  sendQuestion.answer = answer;
   sendQuestion.unit = unit;
 
   await sendQuestion.save().catch((error) => {
@@ -56,7 +55,6 @@ const put = catchAsync(async (req: any, res: any) => {
   let { question, answer } = req.body;
 
   selectedQuestion.question = question;
-  selectedQuestion.answer = answer;
 
   let updatedQuestion = await selectedQuestion.save().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
