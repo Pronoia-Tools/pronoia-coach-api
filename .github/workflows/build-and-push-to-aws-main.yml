@@ -34,7 +34,7 @@ jobs:
           npm install
           npm run build
           npm run copy-files
-          echo VERSION=$GITHUB_SHA >> .env
+          echo VERSION=$GITHUB_SHA >> ./dist/.env
       - name: Deploy
         working-directory: ./dist
         run: eb deploy 

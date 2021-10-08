@@ -49,8 +49,8 @@ if (config.env === "development") {
 }
 
 if (config.version) {
-  router.get('/version', function (req, res) {
-    res.send()
+  router.get('/version', function (req: any, res:any ) {
+    res.status(200).json({version: config.version});
   })
 }
 
