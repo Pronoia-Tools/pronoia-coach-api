@@ -8,6 +8,7 @@ router.get("/:id", auth(), workbookController.get);
 router.get("/", auth(), workbookController.getAll);
 router.post("/", auth(), workbookController.post);
 router.put("/:id", auth(), workbookController.put);
+router.post("/:id/image", auth(), workbookController.putImage);
 router.delete("/:id", auth(), workbookController.remove);
 // router.post('/login', validate(authValidation.login), authController.login);
 // router.post('/send-verification-email', auth(), authController.sendVerificationEmail);

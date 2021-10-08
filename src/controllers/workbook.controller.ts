@@ -6,7 +6,7 @@ const httpStatus = require('http-status');
 const catchAsync = require("../utils/catchAsync");
 const ApiError = require('../utils/ApiError');
 const pick = require('../utils/pick');
-
+const admin = require("../config/firebaseAdmin").firebase_admin_connect();
 
 
 /** Schemas */
@@ -92,6 +92,50 @@ const put = catchAsync(async (req: any, res: any) => {
   });
 
   res.status(httpStatus.OK).json(updatedWorkbook);
+});
+const putImage = catchAsync(async (req: any, res: any) => {
+
+  const selectedWorkbook = await Workbook.findOne({
+    where: {
+      id: req.params.id
+    },
+    relations: ['author']
+  });
+
+  if(!selectedWorkbook)
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "The workbook does not exist"
+    );
+
+  if (req.currentUser.id != selectedWorkbook.author.id)
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "You need to be the author to edit"
+    );
+    var bucket = admin.storage().bucket();
+    var bytes = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x21]);
+    bucket.put(bytes).then(function(snapshot:any) {
+      console.log('Uploaded an array!');
+    });
+    console.log(bucket)
+  // let { title, published, edition, language, price, currency, status, tags, description } = req.body;
+
+  // selectedWorkbook.title = title;
+  // selectedWorkbook.published = published;
+  // selectedWorkbook.edition = edition;
+  // selectedWorkbook.language = language;
+  // selectedWorkbook.price = price;
+  // selectedWorkbook.currency = currency;
+  // selectedWorkbook.status = status;
+  // selectedWorkbook.tags = tags;
+  // selectedWorkbook.description = description;
+ 
+  // let updatedWorkbook = await selectedWorkbook.save().catch((error) => {
+  //   throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  // });
+
+  res.status(httpStatus.OK).json("updatedWorkbook");
 });
   
 const remove = catchAsync(async (req: any, res: any) => {
@@ -214,5 +258,6 @@ module.exports = {
   post,
   remove,
   getUnitAll,
-  putUnit
+  putUnit,
+  putImage
 };
