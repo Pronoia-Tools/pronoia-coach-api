@@ -9,15 +9,14 @@ import { Unit } from "./Unit";
 
 @Entity()
 export class Question extends BaseEntity {
+
   @PrimaryGeneratedColumn()
   id: number;
 
   @ManyToOne(() => Unit, (unit) => unit.questions)
-  unit: Unit[];
+  unit: Unit;
 
-  @Column({ length: 100 })
+  @Column({ type: "text" })
   question: string;
 
-  @Column({ length: 100, nullable: true })
-  answer: string;
 }

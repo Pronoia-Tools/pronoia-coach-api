@@ -10,6 +10,7 @@ import { Question } from "./Questions";
 
 @Entity()
 export class Unit extends BaseEntity {
+  
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -19,6 +20,6 @@ export class Unit extends BaseEntity {
   @Column("json", { nullable: false, default: {} })
   contents: object;
 
-  @OneToMany(() => Question, (question) => question.question)
+  @OneToMany(() => Question, (question) => question.unit)
   questions: Question[];
 }
