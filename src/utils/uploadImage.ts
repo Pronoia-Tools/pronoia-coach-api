@@ -11,12 +11,12 @@ export const uploadImageToStorage = (file:any) => {
     let newFileName = `${Date.now()}_${file.originalname}`;
 
     let fileUpload = admin.storage().bucket().file(newFileName);
-
+    const tokenImage = uuid()
     const blobStream = fileUpload.createWriteStream({
       metadata: {
         metadata: {
           // This line is very important. It's to create a download token.
-          firebaseStorageDownloadTokens: uuid()
+          firebaseStorageDownloadTokens: tokenImage
         },
     
         contentType: file.mimetype,
@@ -30,7 +30,8 @@ export const uploadImageToStorage = (file:any) => {
 
     blobStream.on('finish', () => {
       // The public URL can be used to directly access the file via HTTP.
-      const url = format(`https://storage.googleapis.com/${admin.storage().bucket().name}/${fileUpload.name}`);
+      console.log(tokenImage)
+      const url = format(`https://firebasestorage.googleapis.com/v0/b/${admin.storage().bucket().name}/o/${fileUpload.name}?alt=media&token=${tokenImage}`);
       console.log({url})
       resolve(url);
     });
