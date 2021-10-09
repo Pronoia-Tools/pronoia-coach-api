@@ -7,7 +7,7 @@ const catchAsync = require("../utils/catchAsync");
 const ApiError = require('../utils/ApiError');
 const pick = require('../utils/pick');
 const admin = require("../config/firebaseAdmin").firebase_admin_connect();
-
+const {uploadImageToStorage} = require("../utils/uploadImage")
 
 /** Schemas */
 import { Workbook } from "../models/Workbooks";
@@ -113,30 +113,19 @@ const putImage = catchAsync(async (req: any, res: any) => {
       httpStatus.INTERNAL_SERVER_ERROR,
       "You need to be the author to edit"
     );
-    var bucket = admin.storage().bucket();
-    var bytes = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x21]);
-    bucket.put(bytes).then(function(snapshot:any) {
-      console.log('Uploaded an array!');
+    let file = req.file;
+    if (!file) {
+      throw new ApiError(
+        httpStatus.NOT_FOUND,
+        "You need to insert a image"
+      );
+    }
+    
+    const responseImageUpload = await uploadImageToStorage(file).catch((error:any) => {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
     });
-    console.log(bucket)
-  // let { title, published, edition, language, price, currency, status, tags, description } = req.body;
-
-  // selectedWorkbook.title = title;
-  // selectedWorkbook.published = published;
-  // selectedWorkbook.edition = edition;
-  // selectedWorkbook.language = language;
-  // selectedWorkbook.price = price;
-  // selectedWorkbook.currency = currency;
-  // selectedWorkbook.status = status;
-  // selectedWorkbook.tags = tags;
-  // selectedWorkbook.description = description;
- 
-  // let updatedWorkbook = await selectedWorkbook.save().catch((error) => {
-  //   throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
-  // });
-
-  res.status(httpStatus.OK).json("updatedWorkbook");
-});
+    res.status(httpStatus.OK).json({urlImage:responseImageUpload});
+  });
   
 const remove = catchAsync(async (req: any, res: any) => {
 
