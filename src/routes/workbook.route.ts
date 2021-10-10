@@ -25,8 +25,8 @@ const upload = multer({
 router.get("/:id", auth(), workbookController.get);
 router.get("/", auth(), workbookController.getAll);
 router.post("/", auth(), workbookController.post);
+router.post("/image", [auth(),upload], workbookController.postImage);
 router.put("/:id", auth(), workbookController.put);
-router.post("/:id/image", [auth(),upload], workbookController.putImage);
 router.delete("/:id", auth(), workbookController.remove);
 // router.post('/login', validate(authValidation.login), authController.login);
 // router.post('/send-verification-email', auth(), authController.sendVerificationEmail);

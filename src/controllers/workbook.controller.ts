@@ -32,10 +32,11 @@ const get = catchAsync(async (req: any, res: any) => {
 });
 
 const post = catchAsync(async (req: any, res: any) => {
-  let { title, published, edition, language, price, currency, status, tags, description } = req.body;
+  let { title, published, edition, language, price, currency, status, tags, description, image } = req.body;
   
   const workbook = new Workbook();
   workbook.title = title;
+  workbook.image = image;
   workbook.published = published;
   workbook.edition = edition;
   workbook.language = language;
@@ -75,9 +76,10 @@ const put = catchAsync(async (req: any, res: any) => {
       "You need to be the author to edit"
     );
 
-  let { title, published, edition, language, price, currency, status, tags, description } = req.body;
+  let { title, published, edition, language, price, currency, status, tags, description, image } = req.body;
 
   selectedWorkbook.title = title;
+  selectedWorkbook.image = image;
   selectedWorkbook.published = published;
   selectedWorkbook.edition = edition;
   selectedWorkbook.language = language;
@@ -93,38 +95,19 @@ const put = catchAsync(async (req: any, res: any) => {
 
   res.status(httpStatus.OK).json(updatedWorkbook);
 });
-const putImage = catchAsync(async (req: any, res: any) => {
-
-  const selectedWorkbook = await Workbook.findOne({
-    where: {
-      id: req.params.id
-    },
-    relations: ['author']
+const postImage = catchAsync(async (req: any, res: any) => {
+  let file = req.file;
+  if (!file) {
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "You need to insert a image"
+    );
+  }
+  
+  const responseImageUpload = await uploadImageToStorage(file).catch((error:any) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
-
-  if(!selectedWorkbook)
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      "The workbook does not exist"
-    );
-
-  if (req.currentUser.id != selectedWorkbook.author.id)
-    throw new ApiError(
-      httpStatus.INTERNAL_SERVER_ERROR,
-      "You need to be the author to edit"
-    );
-    let file = req.file;
-    if (!file) {
-      throw new ApiError(
-        httpStatus.NOT_FOUND,
-        "You need to insert a image"
-      );
-    }
-    
-    const responseImageUpload = await uploadImageToStorage(file).catch((error:any) => {
-      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
-    });
-    res.status(httpStatus.OK).json({urlImage:responseImageUpload});
+  res.status(httpStatus.OK).json({urlImage:responseImageUpload});
   });
   
 const remove = catchAsync(async (req: any, res: any) => {
@@ -248,5 +231,5 @@ module.exports = {
   remove,
   getUnitAll,
   putUnit,
-  putImage
+  postImage
 };

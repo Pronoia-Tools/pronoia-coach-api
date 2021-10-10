@@ -21,6 +21,9 @@ export class Workbook extends BaseEntity {
   @Column({ length: 100 })
   title: string;
 
+  @Column({ length: 200, default:null })
+  image: string;
+
   @Column({ type: "timestamp" })
   published: Date;
 
