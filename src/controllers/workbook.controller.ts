@@ -102,10 +102,33 @@ const put = catchAsync(async (req: any, res: any) => {
   res.status(httpStatus.OK).json(updatedWorkbook);
 });
 const putImages = catchAsync(async (req: any, res: any) => {
-  console.log({files:req.files})
+  const selectedWorkbook = await Workbook.findOne({
+    where: {
+      id: req.params.id
+    },
+    relations: ['author']
+  });
+  if(!selectedWorkbook){
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "The workbook does not exist"
+    );
+  }
+  if (req.currentUser.id != selectedWorkbook.author.id)
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "You need to be the author to edit"
+    );
 
+  let files = req.files;
+  if (!files) {
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "You need to insert a image"
+    );
+  }
   const responses = await Promise.all(
-    req.files.map(async (image:any) => {
+    files.map(async (image:any) => {
       const savedImage = await uploadImageToStorage(image)
 
       if(!savedImage) return {image:image.originalname,url:null}
@@ -115,7 +138,7 @@ const putImages = catchAsync(async (req: any, res: any) => {
   )
 
   if (!responses) {
-    throw new ApiError(httpStatus.BAD_REQUEST, " field");
+    throw new ApiError(httpStatus.BAD_REQUEST, "Error saving images in storage");
   }
 
   responses.forEach(async (response:any) => {
@@ -145,8 +168,7 @@ const postImage = catchAsync(async (req: any, res: any) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
   res.status(httpStatus.OK).json({urlImage:responseImageUpload});
-  });
-  
+});
 const remove = catchAsync(async (req: any, res: any) => {
 
   const selectedWorkbook = await Workbook.findOne({
