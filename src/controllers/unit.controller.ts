@@ -23,7 +23,12 @@ const getAll = catchAsync(async (req: any, res: any) => {
 });
 
 const get = catchAsync(async (req: any, res: any) => {
-  const selectedWorkbook = await Workbook.findOne({ id: req.params.id});
+  const selectedWorkbook = await Workbook.findOne({ 
+    where:{
+      id: req.params.id
+    },
+    relations: ['images']
+  });
   res.status(httpStatus.OK).json({ selectedWorkbook });
 });
 

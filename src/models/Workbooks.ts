@@ -6,9 +6,11 @@ import {
   BaseEntity,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from "typeorm";
 import { User } from "./User";
 import { Unit } from "./Unit";
+import { Images } from "./Images";
 
 @Entity()
 export class Workbook extends BaseEntity {
@@ -51,4 +53,7 @@ export class Workbook extends BaseEntity {
   @ManyToMany(() => Unit)
   @JoinTable()
   units: Unit[];
+
+  @OneToMany(() => Images, (images) => images.workbook)
+  images: Images[];
 }

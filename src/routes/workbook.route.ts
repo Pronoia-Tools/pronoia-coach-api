@@ -19,14 +19,15 @@ const upload = multer({
       return cb(new ApiError(httpStatus.NOT_FOUND,'Only .png, .jpg and .jpeg format allowed!'));
     }
   }
-}).single('file');
+});
 
 
 router.get("/:id", auth(), workbookController.get);
 router.get("/", auth(), workbookController.getAll);
 router.post("/", auth(), workbookController.post);
-router.post("/image", [auth(),upload], workbookController.postImage);
+router.post("/image", [auth(),upload.single('file')], workbookController.postImage);
 router.put("/:id", auth(), workbookController.put);
+router.post("/:id/images", [auth(),upload.array('images',12)], workbookController.putImages);
 router.delete("/:id", auth(), workbookController.remove);
 // router.post('/login', validate(authValidation.login), authController.login);
 // router.post('/send-verification-email', auth(), authController.sendVerificationEmail);

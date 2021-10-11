@@ -12,6 +12,7 @@ const {uploadImageToStorage} = require("../utils/uploadImage")
 /** Schemas */
 import { Workbook } from "../models/Workbooks";
 import { Unit } from "../models/Unit";
+import { Images } from "../models/Images";
 
 /** Sample data */
 const unit = require('../utils/sampleUnit');
@@ -21,13 +22,18 @@ const getAll = catchAsync(async (req: any, res: any) => {
     where: {
       author: req.currentUser
     },
-    relations: ['author']
+    relations: ['author','images']
   });
   res.status(httpStatus.OK).json(selectedWorkbooks);
 });
 
 const get = catchAsync(async (req: any, res: any) => {
-  const selectedWorkbook = await Workbook.findOne({ id: req.params.id});
+  const selectedWorkbook = await Workbook.findOne({
+    where:{
+      id: req.params.id
+    },
+    relations: ['images']
+  });
   res.status(httpStatus.OK).json({ selectedWorkbook });
 });
 
@@ -95,6 +101,37 @@ const put = catchAsync(async (req: any, res: any) => {
 
   res.status(httpStatus.OK).json(updatedWorkbook);
 });
+const putImages = catchAsync(async (req: any, res: any) => {
+  console.log({files:req.files})
+
+  const responses = await Promise.all(
+    req.files.map(async (image:any) => {
+      const savedImage = await uploadImageToStorage(image)
+
+      if(!savedImage) return {image:image.originalname,url:null}
+
+      return {image:image.originalname,url:savedImage}
+    })
+  )
+
+  if (!responses) {
+    throw new ApiError(httpStatus.BAD_REQUEST, " field");
+  }
+
+  responses.forEach(async (response:any) => {
+    if(response.url){
+      const newImage = new Images();
+      newImage.url = response.url;
+      newImage.workbook = req.params.id;
+      
+      await newImage.save().catch((error) => {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+      });
+    }
+  })
+
+  res.status(httpStatus.OK).json(responses);
+});
 const postImage = catchAsync(async (req: any, res: any) => {
   let file = req.file;
   if (!file) {
@@ -146,7 +183,7 @@ const getUnitAll = catchAsync(async (req: any, res: any) => {
       author: req.currentUser,
       id: req.params.workbookId
     },
-    relations: ['author', 'units']
+    relations: ['author', 'units', 'images']
   });
   
   if(!selectedWorkbook)
@@ -231,5 +268,6 @@ module.exports = {
   remove,
   getUnitAll,
   putUnit,
-  postImage
+  postImage,
+  putImages
 };
