@@ -140,6 +140,19 @@ const login = catchAsync(async (req: any, res: any) => {
   });
 });
 
+const refresh = catchAsync(async (req: any, res: any) => {
+  res.status(httpStatus.OK).json({
+    user: pick(req.currentUser, ["firstName", "lastName", "email", "country"]),
+    token: req.get('authorization').replace('Bearer ', ''),
+  });
+});
+
+const logout = catchAsync(async (req: any, res: any) => {
+  const admin = require("../config/firebaseAdmin").firebase_admin_connect();
+  const response = await admin.auth().revokeRefreshTokens(req.currentUser.uuid)
+  res.status(httpStatus.OK).json(response);
+});
+
 // const logout = catchAsync(async (req, res) => {
 //   await authService.logout(req.body.refreshToken);
 //   res.status(httpStatus.NO_CONTENT).send();
@@ -175,7 +188,8 @@ const login = catchAsync(async (req: any, res: any) => {
 module.exports = {
   register,
   login,
-  // logout,
+  refresh,
+  logout,
   // refreshTokens,
   // forgotPassword,
   // resetPassword,

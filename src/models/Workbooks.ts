@@ -50,10 +50,17 @@ export class Workbook extends BaseEntity {
   @Column({ length: 100 })
   tags: "";
 
+  @Column("json", { nullable: false, default: {tree: []} })
+  structure: StructureObject;
+
   @ManyToMany(() => Unit)
   @JoinTable()
   units: Unit[];
 
   @OneToMany(() => Images, (images) => images.workbook)
   images: Images[];
+}
+
+interface StructureObject {
+  tree: Array<object>;
 }

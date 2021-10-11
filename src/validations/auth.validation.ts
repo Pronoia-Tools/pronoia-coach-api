@@ -19,6 +19,12 @@ const login = {
   }),
 };
 
+const refresh = {
+  body: Joi.object().keys({
+    token: Joi.string().required(),
+  })
+}
+
 // const logout = {
 //   body: Joi.object().keys({
 //     refreshToken: Joi.string().required(),

@@ -17,7 +17,7 @@ export class Unit extends BaseEntity {
   @Column({ length: 100 })
   name: string;
 
-  @Column("json", { nullable: false, default: {} })
+  @Column("json", { nullable: false, default: {type: "doc", content: []} })
   contents: object;
 
   @OneToMany(() => Question, (question) => question.unit)
