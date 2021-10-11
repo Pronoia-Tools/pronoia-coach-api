@@ -45,7 +45,14 @@ export class Workbook extends BaseEntity {
   @Column({ length: 100 })
   tags: "";
 
+  @Column("json", { nullable: false, default: {tree: []} })
+  structure: StructureObject;
+
   @ManyToMany(() => Unit)
   @JoinTable()
   units: Unit[];
+}
+
+interface StructureObject {
+  tree: Array<object>;
 }

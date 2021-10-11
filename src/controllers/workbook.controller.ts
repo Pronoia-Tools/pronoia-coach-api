@@ -46,11 +46,11 @@ const post = catchAsync(async (req: any, res: any) => {
   workbook.description = description;
   workbook.author = req.currentUser;
 
-  await workbook.save().catch((error) => {
+  let newWorkbook = await workbook.save().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
 
-  res.status(httpStatus.OK).json(workbook);
+  res.status(httpStatus.OK).json(newWorkbook);
 
 });
 
@@ -75,7 +75,7 @@ const put = catchAsync(async (req: any, res: any) => {
       "You need to be the author to edit"
     );
 
-  let { title, published, edition, language, price, currency, status, tags, description } = req.body;
+  let { title, published, edition, language, price, currency, status, tags, description, structure } = req.body;
 
   selectedWorkbook.title = title;
   selectedWorkbook.published = published;
@@ -86,7 +86,10 @@ const put = catchAsync(async (req: any, res: any) => {
   selectedWorkbook.status = status;
   selectedWorkbook.tags = tags;
   selectedWorkbook.description = description;
+  selectedWorkbook.structure = structure;
  
+  console.log(selectedWorkbook)
+
   let updatedWorkbook = await selectedWorkbook.save().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
@@ -155,6 +158,15 @@ const getUnitAll = catchAsync(async (req: any, res: any) => {
     });
 
     selectedWorkbook.units.push(firstUnit);
+    
+    if(!selectedWorkbook.structure.tree) {
+      selectedWorkbook.structure.tree =[]
+    }
+    selectedWorkbook.structure.tree.push({
+      text: 'My first Content', 
+      type:'content',
+      id: firstUnit.id
+    })
 
     await selectedWorkbook.save().catch((error) => {
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
@@ -162,6 +174,45 @@ const getUnitAll = catchAsync(async (req: any, res: any) => {
   }
   
   res.status(httpStatus.OK).json(selectedWorkbook);
+});
+
+const postUnit = catchAsync(async (req: any, res: any) => {
+  let { title } = req.body;
+
+  const selectedWorkbook = await Workbook.findOne({ 
+    where: {
+      author: req.currentUser,
+      id: req.params.workbookId
+    },
+    relations: ['author', 'units']
+  });
+
+  if(!selectedWorkbook)
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "The workbook does not exist"
+    );
+
+  if (req.currentUser.id != selectedWorkbook.author.id)
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "You need to be the author to edit"
+    );
+
+  const unit = new Unit();
+  unit.name = title
+
+  await unit.save().catch((error) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  });
+
+  selectedWorkbook.units.push(unit);
+  
+  await selectedWorkbook.save().catch((error) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  });
+
+  res.status(httpStatus.OK).json({unit: unit, workbook: selectedWorkbook});
 });
 
 const putUnit = catchAsync(async (req: any, res: any) => {
@@ -214,5 +265,6 @@ module.exports = {
   post,
   remove,
   getUnitAll,
+  postUnit,
   putUnit
 };
