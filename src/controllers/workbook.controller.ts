@@ -340,12 +340,8 @@ module.exports = {
   post,
   remove,
   getUnitAll,
-<<<<<<< HEAD
-  putUnit,
   postImage,
-  putImages
-=======
+  putImages,
   postUnit,
   putUnit
->>>>>>> 1dafe22ef7ba97efa6bc427a609fbada1a6acfd8
 };
