@@ -8,7 +8,9 @@ const firebase_admin_connect = () => {
         try { 
             // console.log(config.serviceAccount)
             admin.initializeApp({
-                credential: admin.credential.cert(config.serviceAccount)
+                credential: admin.credential.cert(config.serviceAccount),
+                storageBucket: config.firebase.storageBucket
+
             }); 
         } catch (e) { 
             console.log(e); 

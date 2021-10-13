@@ -6,8 +6,7 @@ const httpStatus = require('http-status');
 const catchAsync = require("../utils/catchAsync");
 const ApiError = require('../utils/ApiError');
 const pick = require('../utils/pick');
-
-
+const admin = require("../config/firebaseAdmin").firebase_admin_connect();
 
 /** Schemas */
 import { Workbook } from "../models/Workbooks";
@@ -21,21 +20,27 @@ const getAll = catchAsync(async (req: any, res: any) => {
     where: {
       author: req.currentUser
     },
-    relations: ['author']
+    relations: ['author','units']
   });
   res.status(httpStatus.OK).json(selectedWorkbooks);
 });
 
 const get = catchAsync(async (req: any, res: any) => {
-  const selectedWorkbook = await Workbook.findOne({ id: req.params.id});
+  const selectedWorkbook = await Workbook.findOne({
+    where:{
+      id: req.params.id
+    },
+    relations: ['author', 'units']
+  });
   res.status(httpStatus.OK).json({ selectedWorkbook });
 });
 
 const post = catchAsync(async (req: any, res: any) => {
-  let { title, published, edition, language, price, currency, status, tags, description } = req.body;
+  let { title, published, edition, language, price, currency, status, tags, description, image } = req.body;
   
   const workbook = new Workbook();
   workbook.title = title;
+  workbook.image = image;
   workbook.published = published;
   workbook.edition = edition;
   workbook.language = language;
@@ -75,9 +80,10 @@ const put = catchAsync(async (req: any, res: any) => {
       "You need to be the author to edit"
     );
 
-  let { title, published, edition, language, price, currency, status, tags, description, structure } = req.body;
+  let { title, published, edition, language, price, currency, status, tags, description, image, structure } = req.body;
 
   selectedWorkbook.title = title;
+  selectedWorkbook.image = image;
   selectedWorkbook.published = published;
   selectedWorkbook.edition = edition;
   selectedWorkbook.language = language;
@@ -96,7 +102,7 @@ const put = catchAsync(async (req: any, res: any) => {
 
   res.status(httpStatus.OK).json(updatedWorkbook);
 });
-  
+
 const remove = catchAsync(async (req: any, res: any) => {
 
   const selectedWorkbook = await Workbook.findOne({
@@ -257,7 +263,6 @@ const putUnit = catchAsync(async (req: any, res: any) => {
   res.status(httpStatus.OK).json(updatedUnit);
 });
   
-
 module.exports = {
   getAll,
   get,
