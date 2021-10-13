@@ -27,7 +27,7 @@ const get = catchAsync(async (req: any, res: any) => {
     where:{
       id: req.params.id
     },
-    relations: ['images']
+    relations: ['author']
   });
   res.status(httpStatus.OK).json({ selectedWorkbook });
 });

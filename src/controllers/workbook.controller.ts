@@ -7,7 +7,6 @@ const catchAsync = require("../utils/catchAsync");
 const ApiError = require('../utils/ApiError');
 const pick = require('../utils/pick');
 const admin = require("../config/firebaseAdmin").firebase_admin_connect();
-const {uploadImageToStorage} = require("../utils/uploadImage")
 
 /** Schemas */
 import { Workbook } from "../models/Workbooks";

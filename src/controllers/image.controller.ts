@@ -25,26 +25,6 @@ const getAll = catchAsync(async (req: any, res: any) => {
     res.status(httpStatus.OK).json(images);
 });
 
-const postImage = catchAsync(async (req: any, res: any) => {
-    console.log('POST')
-   
-    let file = req.file;
-    if (!file) {
-      throw new ApiError(
-        httpStatus.NOT_FOUND,
-        "You need to insert a image"
-      );
-    }
-  
-    
-    
-    const responseImageUpload = await uploadImageToStorage(file).catch((error:any) => {
-      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
-    });
-  
-    res.status(httpStatus.OK).json({urlImage:responseImageUpload});
-  });
-  
 const post = catchAsync(async (req: any, res: any) => {
 
     let files = req.files;
