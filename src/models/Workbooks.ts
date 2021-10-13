@@ -10,7 +10,6 @@ import {
 } from "typeorm";
 import { User } from "./User";
 import { Unit } from "./Unit";
-import { Images } from "./Images";
 
 @Entity()
 export class Workbook extends BaseEntity {
@@ -57,8 +56,6 @@ export class Workbook extends BaseEntity {
   @JoinTable()
   units: Unit[];
 
-  @OneToMany(() => Images, (images) => images.workbook)
-  images: Images[];
 }
 
 interface StructureObject {

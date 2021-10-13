@@ -5,17 +5,16 @@ import {
   Column,
   BaseEntity,
 } from "typeorm";
-import { Unit } from "./Unit";
-import { Workbook } from "./Workbooks";
+import { User } from "./User";
 
 @Entity()
-export class Images extends BaseEntity {
+export class Image extends BaseEntity {
 
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Workbook, (workbook) => workbook.images)
-  workbook: Workbook;
+  @ManyToOne(() => User, (user) => user.images)
+  owner: User;
 
   @Column({ type: "text" })
   url: string;

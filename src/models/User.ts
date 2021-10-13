@@ -5,7 +5,9 @@ import {
   Column,
   BaseEntity,
 } from "typeorm";
+
 import { Workbook } from "./Workbooks";
+import { Image } from "./Images";
 
 @Entity()
 export class User extends BaseEntity {
@@ -32,4 +34,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Workbook, (workbook) => workbook.author)
   workbooks: Workbook[];
+
+  @OneToMany(() => Image, (image) => image.owner)
+  images: Image[];
 }

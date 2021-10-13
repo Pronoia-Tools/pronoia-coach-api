@@ -8,6 +8,7 @@ export const uploadImageToStorage = (file:any) => {
     if (!file) {
       reject('No image file');
     }
+
     let newFileName = `${Date.now()}_${file.originalname}`;
 
     let fileUpload = admin.storage().bucket().file(newFileName);
@@ -25,6 +26,7 @@ export const uploadImageToStorage = (file:any) => {
     });
 
     blobStream.on('error', (error:any) => {
+      console.log(error)
       reject('Something is wrong! Unable to upload at the moment.');
     });
 

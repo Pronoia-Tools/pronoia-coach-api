@@ -9,6 +9,7 @@ const ApiError = require('../utils/ApiError');
 
 const multer = require('multer');
 const storage = multer.memoryStorage();
+
 const upload = multer({ 
   storage: storage,
   fileFilter: (req:any, file:any, cb:any) => {
@@ -25,9 +26,9 @@ const upload = multer({
 router.get("/:id", auth(), workbookController.get);
 router.get("/", auth(), workbookController.getAll);
 router.post("/", auth(), workbookController.post);
-router.post("/image", [auth(),upload.single('file')], workbookController.postImage);
+
 router.put("/:id", auth(), workbookController.put);
-router.post("/:id/images", [auth(),upload.array('images',12)], workbookController.putImages);
+
 router.delete("/:id", auth(), workbookController.remove);
 // router.post('/login', validate(authValidation.login), authController.login);
 // router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
