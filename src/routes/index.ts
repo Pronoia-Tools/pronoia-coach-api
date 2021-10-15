@@ -7,6 +7,7 @@ const config = require("../config/config");
 const authRoute = require("./auth.route");
 const workbookRoute = require("./workbook.route");
 const questionsRoute = require("./questions.route");
+const reportController = require("./report.route")
 const unitRoute = require("./unit.route");
 const imageRoute = require("./image.route");
 
@@ -31,6 +32,10 @@ const defaultRoutes = [
   {
     path: "/questions",
     route: questionsRoute,
+  },
+  {
+    path: "/report",
+    route: reportController,
   },
 ];
 
