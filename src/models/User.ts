@@ -8,6 +8,7 @@ import {
 
 import { Workbook } from "./Workbooks";
 import { Image } from "./Images";
+import { Report } from "./Report";
 
 @Entity()
 export class User extends BaseEntity {
@@ -34,6 +35,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Workbook, (workbook) => workbook.author)
   workbooks: Workbook[];
+  
+  @OneToMany(() => Report, (report) => report.author)
+  reports: Report[];
 
   @OneToMany(() => Image, (image) => image.owner)
   images: Image[];
