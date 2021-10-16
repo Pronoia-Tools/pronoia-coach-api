@@ -33,6 +33,9 @@ export class User extends BaseEntity {
   @Column({ length: 100 })
   country: string;
 
+  @Column()
+  notify: boolean;
+
   @OneToMany(() => Workbook, (workbook) => workbook.author)
   workbooks: Workbook[];
   
