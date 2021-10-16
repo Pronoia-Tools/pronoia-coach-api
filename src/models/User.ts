@@ -9,6 +9,7 @@ import {
 import { Workbook } from "./Workbooks";
 import { Image } from "./Images";
 import { Report } from "./Report";
+import { Unit } from "./Unit";
 
 @Entity()
 export class User extends BaseEntity {
@@ -33,7 +34,7 @@ export class User extends BaseEntity {
   @Column({ length: 100 })
   country: string;
 
-  @Column()
+  @Column({ default: false })
   notify: boolean;
 
   @OneToMany(() => Workbook, (workbook) => workbook.author)
@@ -44,4 +45,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Image, (image) => image.owner)
   images: Image[];
+
+  @OneToMany(() => Unit, (unit) => unit.owner)
+  units: Unit[];
 }

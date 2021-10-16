@@ -157,6 +157,7 @@ const getUnitAll = catchAsync(async (req: any, res: any) => {
   if (selectedWorkbook.units.length === 0) {
     const firstUnit = new Unit();
     firstUnit.name = "First Unit";
+    firstUnit.owner = req.currentUser;
     firstUnit.contents = unit;
 
     await firstUnit.save().catch((error) => {
