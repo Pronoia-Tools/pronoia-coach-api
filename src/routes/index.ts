@@ -21,10 +21,10 @@ const defaultRoutes = [
     path: "/workbook",
     route: workbookRoute,
   },
-  // {
-  //   path: '/unit',
-  //   route: unitRoute,
-  // },
+  {
+    path: '/unit',
+    route: unitRoute,
+  },
   {
     path: "/image",
     route: imageRoute,
