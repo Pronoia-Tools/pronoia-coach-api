@@ -1,7 +1,7 @@
 export {};
 /** Node Modules */
 const httpStatus = require("http-status");
-const { getAuth, signInWithEmailAndPassword } = require("firebase/auth");
+const { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail  } = require("firebase/auth");
 
 /** Custom Modules */
 const admin = require("../config/firebaseAdmin").firebase_admin_connect();
@@ -153,6 +153,16 @@ const logout = catchAsync(async (req: any, res: any) => {
   res.status(httpStatus.OK).json(response);
 });
 
+const restorePassword = catchAsync(async (req: any, res: any) => {
+  const { email } = req.body
+  
+  await sendPasswordResetEmail(getAuth(), email).catch((error:any) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  });
+  
+  res.status(httpStatus.OK).json({email});
+});
+
 // const logout = catchAsync(async (req, res) => {
 //   await authService.logout(req.body.refreshToken);
 //   res.status(httpStatus.NO_CONTENT).send();
@@ -190,6 +200,7 @@ module.exports = {
   login,
   refresh,
   logout,
+  restorePassword
   // refreshTokens,
   // forgotPassword,
   // resetPassword,
