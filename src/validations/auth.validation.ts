@@ -9,6 +9,7 @@ const register = {
     email: Joi.string().required().email(),
     password: Joi.string().required().custom(password),
     country: Joi.string().required(),
+    notify: Joi.boolean().required(),
   }),
 };
 

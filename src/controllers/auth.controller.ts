@@ -22,7 +22,7 @@ import { User } from "../models/User";
 
 const register = catchAsync(async (req: any, res: any) => {
   let body = req.body;
-  let { firstname, lastname, email, password, country } = body;
+  let { firstname, lastname, email, password, country, notify } = body;
 
   const userPass: any[] = [];
   await admin
@@ -62,6 +62,8 @@ const register = catchAsync(async (req: any, res: any) => {
   user.lastName = lastname;
   user.email = email;
   user.country = country;
+  user.country = country;
+  user.notify = notify;
   user.uuid = userPass[1];
 
   await user.save().catch((error: any) => {
@@ -94,7 +96,7 @@ const register = catchAsync(async (req: any, res: any) => {
     );
 
   res.status(httpStatus.OK).json({
-    user: pick(user, ["id", "firstName", "lastName", "email", "country"]),
+    user: pick(user, ["id", "firstName", "lastName", "email", "country", "notify"]),
     token: token,
   });
 });
