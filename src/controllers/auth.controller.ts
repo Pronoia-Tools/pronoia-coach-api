@@ -10,7 +10,6 @@ const catchAsync = require("../utils/catchAsync");
 const ApiError = require("../utils/ApiError");
 const pick = require("../utils/pick");
 
-import { firestore } from "firebase-admin";
 /** Schemas */
 import { User } from "../models/User";
 
@@ -58,18 +57,6 @@ const register = catchAsync(async (req: any, res: any) => {
       throw new ApiError(code, error.message);
     });
 
-
-    function sendVerificationEmail() {
-      // extracting the user from the firebase
-      const auth = getAuth()
-      sendEmailVerification(auth.currentUser).then(function() {
-          window.alert("Verification link sent to your email. Kinldy check to verify your account")
-      }).catch(function(error:any) {
-          throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
-      });
-  }
-  
-
   const user = new User();
   user.firstName = firstname;
   user.lastName = lastname;
@@ -84,18 +71,13 @@ const register = catchAsync(async (req: any, res: any) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
 
+
   let token = "";
   const auth = getAuth()
   await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential: any) => {
-      sendVerificationEmail()
-      if (auth.currentUser.emailVerified === false) {
-        throw new ApiError(
-          httpStatus.INTERNAL_SERVER_ERROR,
-          "You is not verified check your email"
-        );
-      }
       token = userCredential.user.accessToken;
+      return  sendEmailVerification(auth.currentUser);
     })
     .catch((error: any) => {
       let code = httpStatus.INTERNAL_SERVER_ERROR;
@@ -135,16 +117,12 @@ const login = catchAsync(async (req: any, res: any) => {
 
 
   let token = "";
+  let isVerified = false;
   const auth = getAuth()
   await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential: any) => {
-      if (auth.currentUser.emailVerified === false) {
-        throw new ApiError(
-          httpStatus.INTERNAL_SERVER_ERROR,
-          "You is not verified check your email"
-        );
-      }
       token = userCredential.user.accessToken;
+      isVerified = userCredential.user.emailVerified;
     })
     .catch((error: any) => {
       let code = httpStatus.INTERNAL_SERVER_ERROR;
@@ -165,6 +143,12 @@ const login = catchAsync(async (req: any, res: any) => {
       "Could not retrieve token."
     );
 
+  if (!currentUser.isVerified && isVerified) {
+    currentUser.isVerified = true;
+    await currentUser.save().catch((error: any) => {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+    });
+  }
   res.status(httpStatus.OK).json({
     user: pick(currentUser, ["firstName", "lastName", "email", "country"]),
     token: token,
