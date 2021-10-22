@@ -1,7 +1,7 @@
 export {};
 /** Node Modules */
 const httpStatus = require("http-status");
-const { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, sendEmailVerification  } = require("firebase/auth");
+const { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } = require("firebase/auth");
 
 
 /** Custom Modules */
@@ -58,19 +58,17 @@ const register = catchAsync(async (req: any, res: any) => {
       throw new ApiError(code, error.message);
     });
 
-    const auth = getAuth();
-    onAuthStateChanged(auth, (user:any) => {
-      if (user) {
-        sendEmailVerification(user)
-        .then(function() {
-          console.log("Verification link sent to your email. Kinldy check to verify your account")
-      }).catch((error: any) => {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+
+    function sendVerificationEmail() {
+      // extracting the user from the firebase
+      const auth = getAuth()
+      sendEmailVerification(auth.currentUser).then(function() {
+          window.alert("Verification link sent to your email. Kinldy check to verify your account")
+      }).catch(function(error:any) {
+          throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
       });
-      }
-    });
+  }
   
-    
 
   const user = new User();
   user.firstName = firstname;
@@ -87,8 +85,16 @@ const register = catchAsync(async (req: any, res: any) => {
   });
 
   let token = "";
-  await signInWithEmailAndPassword(getAuth(), email, password)
+  const auth = getAuth()
+  await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential: any) => {
+      sendVerificationEmail()
+      if (auth.currentUser.emailVerified === false) {
+        throw new ApiError(
+          httpStatus.INTERNAL_SERVER_ERROR,
+          "You is not verified check your email"
+        );
+      }
       token = userCredential.user.accessToken;
     })
     .catch((error: any) => {
@@ -127,26 +133,17 @@ const login = catchAsync(async (req: any, res: any) => {
     );
   }
 
-  const auth = getAuth();
-  onAuthStateChanged(auth, async (userA:any) => {
-    if (userA) {
-      let userVerification = await userA.emailVerified;
-      if(userVerification === true){ 
-        currentUser.isVerified = true;
-        await currentUser.save()
-      }
-      if (userVerification === false) {
-        throw new ApiError(
-          httpStatus.NOT_FOUND,
-          "The user with email " + email + " is not verified"
-        );
-      }
-    }
-  });
 
   let token = "";
-  await signInWithEmailAndPassword(getAuth(), email, password)
+  const auth = getAuth()
+  await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential: any) => {
+      if (auth.currentUser.emailVerified === false) {
+        throw new ApiError(
+          httpStatus.INTERNAL_SERVER_ERROR,
+          "You is not verified check your email"
+        );
+      }
       token = userCredential.user.accessToken;
     })
     .catch((error: any) => {
