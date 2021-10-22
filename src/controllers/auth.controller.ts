@@ -1,7 +1,8 @@
 export {};
 /** Node Modules */
 const httpStatus = require("http-status");
-const { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail  } = require("firebase/auth");
+const { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } = require("firebase/auth");
+
 
 /** Custom Modules */
 const admin = require("../config/firebaseAdmin").firebase_admin_connect();
@@ -18,7 +19,6 @@ import { User } from "../models/User";
 
 //     return token;
 // }
-
 
 const register = catchAsync(async (req: any, res: any) => {
   let body = req.body;
@@ -65,16 +65,19 @@ const register = catchAsync(async (req: any, res: any) => {
   user.country = country;
   user.notify = notify;
   user.uuid = userPass[1];
+  user.isVerified = false
 
   await user.save().catch((error: any) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
 
+
   let token = "";
-  await signInWithEmailAndPassword(getAuth(), email, password)
+  const auth = getAuth()
+  await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential: any) => {
       token = userCredential.user.accessToken;
-
+      return  sendEmailVerification(auth.currentUser);
     })
     .catch((error: any) => {
       let code = httpStatus.INTERNAL_SERVER_ERROR;
@@ -112,10 +115,14 @@ const login = catchAsync(async (req: any, res: any) => {
     );
   }
 
+
   let token = "";
-  await signInWithEmailAndPassword(getAuth(), email, password)
+  let isVerified = false;
+  const auth = getAuth()
+  await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential: any) => {
       token = userCredential.user.accessToken;
+      isVerified = userCredential.user.emailVerified;
     })
     .catch((error: any) => {
       let code = httpStatus.INTERNAL_SERVER_ERROR;
@@ -136,6 +143,12 @@ const login = catchAsync(async (req: any, res: any) => {
       "Could not retrieve token."
     );
 
+  if (!currentUser.isVerified && isVerified) {
+    currentUser.isVerified = true;
+    await currentUser.save().catch((error: any) => {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+    });
+  }
   res.status(httpStatus.OK).json({
     user: pick(currentUser, ["firstName", "lastName", "email", "country"]),
     token: token,
