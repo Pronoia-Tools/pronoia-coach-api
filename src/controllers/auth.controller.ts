@@ -129,12 +129,12 @@ const login = catchAsync(async (req: any, res: any) => {
       let message = error.message;
       if (error.code === "auth/wrong-password") {
         code = httpStatus.UNAUTHORIZED;
-        message = error.message;
+        message = "You have entered an invalid username or password. Please try again";
       } else if (error.code === "auth/too-many-requests") {
         code = httpStatus.TOO_MANY_REQUESTS;
         message = error.message;
       }
-      throw new ApiError(code, error.message);
+      throw new ApiError(code, message);
     });
 
   if (token === "")
