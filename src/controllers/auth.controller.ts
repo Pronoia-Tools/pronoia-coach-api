@@ -1,7 +1,7 @@
 export {};
 /** Node Modules */
 const httpStatus = require("http-status");
-const { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } = require("firebase/auth");
+const { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateEmail  } = require("firebase/auth");
 
 
 /** Custom Modules */
@@ -114,16 +114,30 @@ const updateUser = catchAsync(async (req: any, res: any) => {
       "The user does not exists"
     );
   }
-  
+  const auth = getAuth()
+  try {
+    const updatedEmail = await updateEmail(auth.currentUser, email)
+    console.log("dasda",updatedEmail)
+    
+  } catch (error) {
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      ""+error
+    );
+  }
+
+
+
   User.merge(currentUser, {
     firstName:firstname,
     lastName:lastname,
     country:country,
+    email:email
   });
   const results = await User.save(currentUser);
 
   res.status(httpStatus.OK).json({
-    user: pick(results, ["id", "firstName", "lastName", "country"]),
+    user: pick(results, ["id","email", "firstName", "lastName", "country"]),
   });
   
 });
