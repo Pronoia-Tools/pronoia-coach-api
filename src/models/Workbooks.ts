@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 import { User } from "./User";
 import { Unit } from "./Unit";
+import { Tags } from "./Tags";
 
 @Entity()
 export class Workbook extends BaseEntity {
@@ -46,15 +47,16 @@ export class Workbook extends BaseEntity {
   @Column({ type: "text" })
   description: string;
 
-  @Column({ length: 100 })
-  tags: "";
-
   @Column("json", { nullable: false, default: {tree: []} })
   structure: StructureObject;
 
   @ManyToMany(() => Unit)
   @JoinTable()
   units: Unit[];
+
+  @ManyToMany(() => Tags)
+  @JoinTable()
+  tags: Tags[];
 
 }
 
