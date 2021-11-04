@@ -12,6 +12,16 @@ const register = {
     notify: Joi.boolean().required(),
   }),
 };
+const update = {
+  body: Joi.object().keys({
+    firstname: Joi.string().required(),
+    lastname: Joi.string().required(),
+    email: Joi.string().required().email(),
+    country: Joi.string().required(),
+    CurrentPassword: Joi.string().required(),
+    password: Joi.string().required().custom(password),
+  }),
+};
 
 const login = {
   body: Joi.object().keys({
@@ -62,6 +72,7 @@ const refresh = {
 module.exports = {
   register,
   login,
+  update
   // logout,
   // refreshTokens,
   // forgotPassword,

@@ -104,6 +104,31 @@ const register = catchAsync(async (req: any, res: any) => {
   });
 });
 
+const updateUser = catchAsync(async (req: any, res: any) => {
+  const { firstname, lastname, email, country, password, CurrentPassword } = req.body;
+
+  const currentUser = await User.findOne(req.params.id);
+  if (!currentUser) {
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "The user does not exists"
+    );
+  }
+  
+  User.merge(currentUser, {
+    firstName:firstname,
+    lastName:lastname,
+    country:country,
+  });
+  const results = await User.save(currentUser);
+
+  res.status(httpStatus.OK).json({
+    user: pick(results, ["id", "firstName", "lastName", "country"]),
+  });
+  
+});
+
+
 const login = catchAsync(async (req: any, res: any) => {
   const { email, password } = req.body;
 
@@ -215,7 +240,8 @@ module.exports = {
   login,
   refresh,
   logout,
-  restorePassword
+  restorePassword,
+  updateUser
   // refreshTokens,
   // forgotPassword,
   // resetPassword,
