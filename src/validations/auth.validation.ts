@@ -18,8 +18,8 @@ const update = {
     lastname: Joi.string().required(),
     email: Joi.string().required().email(),
     country: Joi.string().required(),
-    CurrentPassword: Joi.string().required(),
-    password: Joi.string().required().custom(password),
+    CurrentPassword: Joi.string(),
+    newPassword: Joi.string().custom(password),
   }),
 };
 

@@ -1,7 +1,7 @@
 export {};
 /** Node Modules */
 const httpStatus = require("http-status");
-const { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateEmail  } = require("firebase/auth");
+const { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateEmail, updatePassword   } = require("firebase/auth");
 
 
 /** Custom Modules */
@@ -105,7 +105,7 @@ const register = catchAsync(async (req: any, res: any) => {
 });
 
 const updateUser = catchAsync(async (req: any, res: any) => {
-  const { firstname, lastname, email, country, password, CurrentPassword } = req.body;
+  const { firstname, lastname, email, country, newPassword, CurrentPassword } = req.body;
 
   const currentUser = await User.findOne(req.params.id);
   if (!currentUser) {
@@ -115,18 +115,36 @@ const updateUser = catchAsync(async (req: any, res: any) => {
     );
   }
   const auth = getAuth()
-  try {
-    const updatedEmail = await updateEmail(auth.currentUser, email)
-    console.log("dasda",updatedEmail)
-    
-  } catch (error) {
-    throw new ApiError(
-      httpStatus.NOT_FOUND,
-      ""+error
-    );
+
+  if (req.currentUser.email !== email) {
+    try {
+      await updateEmail(auth.currentUser, email)
+    } catch (error) {
+      throw new ApiError(
+        httpStatus.NOT_FOUND,
+        ""+error
+      );
+    }
   }
 
-
+  if (CurrentPassword && newPassword) {
+    await signInWithEmailAndPassword(auth, email, CurrentPassword)
+    .then((userCredential: any) => {
+      return updatePassword(auth.currentUser, newPassword)
+    })
+    .catch((error: any) => {
+      let code = httpStatus.INTERNAL_SERVER_ERROR;
+      let message = error.message;
+      if (error.code === "auth/wrong-password") {
+        code = httpStatus.UNAUTHORIZED;
+        message = "Old password isn't valid";
+      } else if (error.code === "auth/too-many-requests") {
+        code = httpStatus.TOO_MANY_REQUESTS;
+        message = error.message;
+      }
+      throw new ApiError(code, message);
+    });
+  }
 
   User.merge(currentUser, {
     firstName:firstname,
