@@ -12,14 +12,20 @@ const register = {
     notify: Joi.boolean().required(),
   }),
 };
-const update = {
+const updateUser = {
   body: Joi.object().keys({
     firstname: Joi.string().required(),
     lastname: Joi.string().required(),
-    email: Joi.string().required().email(),
+    currentEmail: Joi.string().required().email(),
+    newEmail: Joi.string().required().email(),
     country: Joi.string().required(),
-    CurrentPassword: Joi.string(),
-    newPassword: Joi.string().custom(password),
+  }),
+};
+const updatePassword = {
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    currentPassword: Joi.string().required(),
+    newPassword: Joi.string().required().custom(password),
   }),
 };
 
@@ -72,7 +78,8 @@ const refresh = {
 module.exports = {
   register,
   login,
-  update
+  updateUser,
+  updatePassword
   // logout,
   // refreshTokens,
   // forgotPassword,

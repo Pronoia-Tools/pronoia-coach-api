@@ -105,9 +105,9 @@ const register = catchAsync(async (req: any, res: any) => {
 });
 
 const updateUser = catchAsync(async (req: any, res: any) => {
-  const { firstname, lastname, email, country, newPassword, CurrentPassword } = req.body;
+  const { firstname, lastname, currentEmail, newEmail, country, newPassword, currentPassword } = req.body;
 
-  const currentUser = await User.findOne(req.params.id);
+  const currentUser = await User.findOne({email:currentEmail});
   if (!currentUser) {
     throw new ApiError(
       httpStatus.NOT_FOUND,
@@ -116,9 +116,11 @@ const updateUser = catchAsync(async (req: any, res: any) => {
   }
   const auth = getAuth()
 
-  if (req.currentUser.email !== email) {
+  let needReauthenticate = false;
+  if (req.currentUser.email !== newEmail) {
     try {
-      await updateEmail(auth.currentUser, email)
+      await updateEmail(auth.currentUser, newEmail)
+      needReauthenticate = true
     } catch (error) {
       throw new ApiError(
         httpStatus.NOT_FOUND,
@@ -126,40 +128,51 @@ const updateUser = catchAsync(async (req: any, res: any) => {
       );
     }
   }
-
-  if (CurrentPassword && newPassword) {
-    await signInWithEmailAndPassword(auth, email, CurrentPassword)
-    .then((userCredential: any) => {
-      return updatePassword(auth.currentUser, newPassword)
-    })
-    .catch((error: any) => {
-      let code = httpStatus.INTERNAL_SERVER_ERROR;
-      let message = error.message;
-      if (error.code === "auth/wrong-password") {
-        code = httpStatus.UNAUTHORIZED;
-        message = "Old password isn't valid";
-      } else if (error.code === "auth/too-many-requests") {
-        code = httpStatus.TOO_MANY_REQUESTS;
-        message = error.message;
-      }
-      throw new ApiError(code, message);
-    });
-  }
-
   User.merge(currentUser, {
     firstName:firstname,
     lastName:lastname,
     country:country,
-    email:email
+    email:newEmail
   });
   const results = await User.save(currentUser);
 
   res.status(httpStatus.OK).json({
-    user: pick(results, ["id","email", "firstName", "lastName", "country"]),
+    user: pick(results, ["email", "firstName", "lastName", "country"]),
+    needReauthenticate
   });
   
 });
+const updateUserPassword = catchAsync(async (req: any, res: any) => {
+  const { email, newPassword, currentPassword } = req.body;
 
+  const currentUser = await User.findOne({email:email});
+  if (!currentUser) {
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "The user does not exists"
+    );
+  }
+  const auth = getAuth()
+  await signInWithEmailAndPassword(auth, email, currentPassword)
+  .then((userCredential: any) => {
+    return updatePassword(auth.currentUser, newPassword)
+  })
+  .catch((error: any) => {
+    let code = httpStatus.INTERNAL_SERVER_ERROR;
+    let message = error.message;
+    if (error.code === "auth/wrong-password") {
+      code = httpStatus.UNAUTHORIZED;
+      message = "Old password isn't valid";
+    } else if (error.code === "auth/too-many-requests") {
+      code = httpStatus.TOO_MANY_REQUESTS;
+      message = error.message;
+    }
+    throw new ApiError(code, message);
+  });
+  
+  res.status(httpStatus.OK).json({email});
+  
+});
 
 const login = catchAsync(async (req: any, res: any) => {
   const { email, password } = req.body;
@@ -273,7 +286,8 @@ module.exports = {
   refresh,
   logout,
   restorePassword,
-  updateUser
+  updateUser,
+  updateUserPassword
   // refreshTokens,
   // forgotPassword,
   // resetPassword,
