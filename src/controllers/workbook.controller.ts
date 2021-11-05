@@ -320,16 +320,12 @@ const putTags = catchAsync(async (req: any, res: any) => {
 
   let { tagsA } = req.body;
 
-  let tagsFinal:any = []
-
   for (let i = 0; i < tagsA.length; i++) {
-    const key = tagsA[i]
     const newTag = new Tags();
+    newTag.name = tagsA[i].name;
+    await newTag.save()
+    selectedWorkbook.tags.push(newTag)
   }
-
-  selectedWorkbook.tags = tagsFinal;
-
-  console.log(selectedWorkbook)
 
   let updatedWorkbook = await selectedWorkbook.save().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
