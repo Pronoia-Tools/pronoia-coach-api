@@ -11,6 +11,7 @@ const admin = require("../config/firebaseAdmin").firebase_admin_connect();
 /** Schemas */
 import { Workbook } from "../models/Workbooks";
 import { Unit } from "../models/Unit";
+import { Tags } from "../models/Tags";
 
 /** Sample data */
 const unit = require('../utils/sampleUnit');
@@ -20,7 +21,7 @@ const getAll = catchAsync(async (req: any, res: any) => {
     where: {
       author: req.currentUser
     },
-    relations: ['author','units']
+    relations: ['author','units', 'tags']
   });
   res.status(httpStatus.OK).json(selectedWorkbooks);
 });
@@ -30,14 +31,14 @@ const get = catchAsync(async (req: any, res: any) => {
     where:{
       id: req.params.id
     },
-    relations: ['author', 'units']
+    relations: ['author', 'units', 'tags']
   });
   res.status(httpStatus.OK).json({ selectedWorkbook });
 });
 
 const post = catchAsync(async (req: any, res: any) => {
   let { title, published, edition, language, price, currency, status, tags, description, image } = req.body;
-  
+
   const workbook = new Workbook();
   workbook.title = title;
   workbook.image = image;
@@ -80,7 +81,7 @@ const put = catchAsync(async (req: any, res: any) => {
       "You need to be the author to edit"
     );
 
-  let { title, published, edition, language, price, currency, status, tags, description, image, structure } = req.body;
+  let { title, published, edition, language, price, currency, status, description, image, structure } = req.body;
 
   selectedWorkbook.title = title;
   selectedWorkbook.image = image;
@@ -90,10 +91,9 @@ const put = catchAsync(async (req: any, res: any) => {
   selectedWorkbook.price = price;
   selectedWorkbook.currency = currency;
   selectedWorkbook.status = status;
-  selectedWorkbook.tags = tags;
   selectedWorkbook.description = description;
   selectedWorkbook.structure = structure;
- 
+
   console.log(selectedWorkbook)
 
   let updatedWorkbook = await selectedWorkbook.save().catch((error) => {
@@ -123,7 +123,7 @@ const remove = catchAsync(async (req: any, res: any) => {
       httpStatus.INTERNAL_SERVER_ERROR,
       "You need to be the author to edit"
     );
-  
+
   let removedWorkbook = await selectedWorkbook.remove().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
@@ -141,7 +141,7 @@ const getUnitAll = catchAsync(async (req: any, res: any) => {
     },
     relations: ['author', 'units']
   });
-  
+
   if(!selectedWorkbook)
     throw new ApiError(
       httpStatus.BAD_REQUEST,
@@ -165,12 +165,12 @@ const getUnitAll = catchAsync(async (req: any, res: any) => {
     });
 
     selectedWorkbook.units.push(firstUnit);
-    
+
     if(!selectedWorkbook.structure.tree) {
       selectedWorkbook.structure.tree =[]
     }
     selectedWorkbook.structure.tree.push({
-      text: 'My first Content', 
+      text: 'My first Content',
       type:'content',
       id: firstUnit.id
     })
@@ -179,14 +179,14 @@ const getUnitAll = catchAsync(async (req: any, res: any) => {
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
     });
   }
-  
+
   res.status(httpStatus.OK).json(selectedWorkbook);
 });
 
 const postUnit = catchAsync(async (req: any, res: any) => {
   let { title } = req.body;
 
-  const selectedWorkbook = await Workbook.findOne({ 
+  const selectedWorkbook = await Workbook.findOne({
     where: {
       author: req.currentUser,
       id: req.params.workbookId
@@ -214,7 +214,7 @@ const postUnit = catchAsync(async (req: any, res: any) => {
   });
 
   selectedWorkbook.units.push(unit);
-  
+
   await selectedWorkbook.save().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
@@ -224,7 +224,7 @@ const postUnit = catchAsync(async (req: any, res: any) => {
 
 const putUnit = catchAsync(async (req: any, res: any) => {
 
-  const selectedWorkbook = await Workbook.findOne({ 
+  const selectedWorkbook = await Workbook.findOne({
     where: {
       author: req.currentUser,
       id: req.params.workbookId
@@ -256,14 +256,88 @@ const putUnit = catchAsync(async (req: any, res: any) => {
 
   selectedUnit.name = name;
   selectedUnit.contents = contents;
- 
+
   let updatedUnit = await selectedUnit.save().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
 
   res.status(httpStatus.OK).json(updatedUnit);
 });
-  
+
+/* TAGS Controllers */
+
+const getAllTags = catchAsync(async (req: any, res: any) => {
+  const allTags = await Tags.find({
+    order: {
+        name: "DESC",
+    }
+}).catch((error) => {
+  throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+});;
+
+const selectedWorkbook = await Workbook.findOne({
+  where: {
+    id: req.params.id
+  },
+  relations: ['author']
+});
+
+if(!selectedWorkbook)
+  throw new ApiError(
+    httpStatus.BAD_REQUEST,
+    "The workbook does not exist"
+  );
+
+  if (req.currentUser.id != selectedWorkbook.author.id)
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "You need to be the author to edit"
+    );
+
+  res.status(httpStatus.OK).json(allTags);
+})
+
+
+const putTags = catchAsync(async (req: any, res: any) => {
+  const selectedWorkbook = await Workbook.findOne({
+    where: {
+      id: req.params.id
+    },
+    relations: ['author', 'tags']
+  });
+
+  if(!selectedWorkbook)
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "The workbook does not exist"
+    );
+
+  if (req.currentUser.id != selectedWorkbook.author.id)
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "You need to be the author to edit"
+    );
+
+  let { tagsA } = req.body;
+
+  let tagsFinal:any = []
+
+  for (let i = 0; i < tagsA.length; i++) {
+    const key = tagsA[i]
+    const newTag = new Tags();
+  }
+
+  selectedWorkbook.tags = tagsFinal;
+
+  console.log(selectedWorkbook)
+
+  let updatedWorkbook = await selectedWorkbook.save().catch((error) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  });
+
+  res.status(httpStatus.OK).json(updatedWorkbook);
+})
+
 module.exports = {
   getAll,
   get,
@@ -272,5 +346,7 @@ module.exports = {
   remove,
   getUnitAll,
   postUnit,
-  putUnit
+  putUnit,
+  getAllTags,
+  putTags
 };
