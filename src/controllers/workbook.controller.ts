@@ -38,8 +38,16 @@ const get = catchAsync(async (req: any, res: any) => {
 
 const post = catchAsync(async (req: any, res: any) => {
   let { title, published, edition, language, price, currency, status, tags, description, image } = req.body;
-
+  
   const workbook = new Workbook();
+
+  for (let i = 0; i < tags.length; i++) {
+    const newTag = new Tags();
+    newTag.name = tags[i].name;
+    await newTag.save()
+    workbook.tags.push(newTag)
+  }
+
   workbook.title = title;
   workbook.image = image;
   workbook.published = published;
@@ -48,7 +56,6 @@ const post = catchAsync(async (req: any, res: any) => {
   workbook.price = price;
   workbook.currency = currency;
   workbook.status = status;
-  workbook.tags = tags;
   workbook.description = description;
   workbook.author = req.currentUser;
 
@@ -309,7 +316,7 @@ if(!selectedWorkbook)
 })
 
 
-const putTags = catchAsync(async (req: any, res: any) => {
+/* const putTags = catchAsync(async (req: any, res: any) => {
   const selectedWorkbook = await Workbook.findOne({
     where: {
       id: req.params.id
@@ -343,7 +350,7 @@ const putTags = catchAsync(async (req: any, res: any) => {
   });
 
   res.status(httpStatus.OK).json(updatedWorkbook);
-})
+}) */
 
 module.exports = {
   getAll,
@@ -355,5 +362,5 @@ module.exports = {
   postUnit,
   putUnit,
   getAllTags,
-  putTags
+  /* putTags */
 };
