@@ -81,7 +81,18 @@ const put = catchAsync(async (req: any, res: any) => {
       "You need to be the author to edit"
     );
 
-  let { title, published, edition, language, price, currency, status, description, image, structure } = req.body;
+
+  let { title, published, edition, language, price, currency, status, description, image, structure, tags } = req.body;
+
+  let tagsNew = tags.filter((e:any) =>  selectedWorkbook.tags.indexOf(e) === -1 )
+
+  for (let i = 0; i < tagsNew.length; i++) {
+    const newTag = new Tags();
+    newTag.name = tagsNew[i].name;
+    await newTag.save()
+    selectedWorkbook.tags.push(newTag)
+  }
+
 
   selectedWorkbook.title = title;
   selectedWorkbook.image = image;
