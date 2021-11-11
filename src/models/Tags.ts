@@ -8,7 +8,7 @@ import {
 
 @Entity()
 export class Tags extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('increment')
   id: number;
 
   @Column({ length: 100 })
