@@ -34,6 +34,9 @@ export class User extends BaseEntity {
   @Column({ length: 100 })
   country: string;
 
+  @Column({ length: 20 })
+  membership: string;
+
   @Column({ default: false })
   notify: boolean;
 
