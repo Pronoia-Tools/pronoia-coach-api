@@ -17,7 +17,7 @@ import { Tags } from "../models/Tags";
 const unit = require('../utils/sampleUnit');
 
 const getAll = catchAsync(async (req: any, res: any) => {
-  const selectedWorkbooks = await Workbook.find({ 
+  const selectedWorkbooks = await Workbook.find({
     where: {
       author: req.currentUser
     },
@@ -92,6 +92,8 @@ const post = catchAsync(async (req: any, res: any) => {
 
 const put = catchAsync(async (req: any, res: any) => {
 
+  console.log('lleog')
+
   const selectedWorkbook = await Workbook.findOne({
     where: {
       id: req.params.id
@@ -111,19 +113,39 @@ const put = catchAsync(async (req: any, res: any) => {
       "You need to be the author to edit"
     );
 
+  // Take all name tags of the workbook
+
   let tagsExist = selectedWorkbook?.tags.map(a => a.name)
+  console.log(tagsExist)
 
   let { title, published, edition, language, price, currency, status, description, image, structure, tags } = req.body;
-
+    console.log(title)
+    console.log(tags)
+  // Take all tags what i need to add
 
   let tagsNew = tags.filter((e:any) =>  tagsExist.indexOf(e) === -1 )
 
-  for (let i = 0; i < tagsNew.length; i++) {
-    const newTag = new Tags();
-    newTag.name = tagsNew[i].charAt(0).toUpperCase() + tagsNew[i].slice(1).toLowerCase();
-    await newTag.save()
-    selectedWorkbook.tags.push(newTag)
+  console.log(tagsNew)
+
+  // Take all tags what i need to delete
+
+  let tagsForDelete = tagsExist.filter((e:any) =>  tags.indexOf(e) === -1 )
+
+  if (tagsNew.length !== 0){
+    console.log('iam here')
+    for (let i = 0; i < tagsNew.length; i++) {
+      const newTag = new Tags();
+      newTag.name = tagsNew[i].charAt(0).toUpperCase() + tagsNew[i].slice(1).toLowerCase();
+      await newTag.save()
+      selectedWorkbook.tags.push(newTag)
+    }
   }
+
+  if (tagsForDelete.length !== 0){
+    console.log('iam here bot')
+    selectedWorkbook.tags = selectedWorkbook.tags.filter((item) => !tagsForDelete.includes(item.name))
+  }
+
 
   selectedWorkbook.title = title;
   selectedWorkbook.image = image;
