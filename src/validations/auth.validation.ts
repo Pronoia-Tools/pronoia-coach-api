@@ -12,6 +12,22 @@ const register = {
     notify: Joi.boolean().required(),
   }),
 };
+const updateUser = {
+  body: Joi.object().keys({
+    firstname: Joi.string().required(),
+    lastname: Joi.string().required(),
+    currentEmail: Joi.string().required().email(),
+    newEmail: Joi.string().required().email(),
+    country: Joi.string().required(),
+  }),
+};
+const updatePassword = {
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    currentPassword: Joi.string().required(),
+    newPassword: Joi.string().required().custom(password),
+  }),
+};
 
 const login = {
   body: Joi.object().keys({
@@ -62,6 +78,8 @@ const refresh = {
 module.exports = {
   register,
   login,
+  updateUser,
+  updatePassword
   // logout,
   // refreshTokens,
   // forgotPassword,
