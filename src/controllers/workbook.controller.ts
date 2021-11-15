@@ -92,7 +92,9 @@ const post = catchAsync(async (req: any, res: any) => {
 
 const put = catchAsync(async (req: any, res: any) => {
 
-  console.log('lleog')
+  const allTags = await Tags.find({}).catch((error) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  });
 
   const selectedWorkbook = await Workbook.findOne({
     where: {
@@ -115,17 +117,16 @@ const put = catchAsync(async (req: any, res: any) => {
 
   // Take all name tags of the workbook
 
+  let allTagsName = allTags.map(a => a.name)
+
   let tagsExist = selectedWorkbook?.tags.map(a => a.name)
-  console.log(tagsExist)
+  let tagsExistAdd = selectedWorkbook?.tags.map(a => a.name)
 
   let { title, published, edition, language, price, currency, status, description, image, structure, tags } = req.body;
-    console.log(title)
-    console.log(tags)
+
   // Take all tags what i need to add
 
-  let tagsNew = tags.filter((e:any) =>  tagsExist.indexOf(e) === -1 )
-
-  console.log(tagsNew)
+  let tagsNew = tags.filter((e:any) =>  tagsExistAdd.indexOf(e) === -1 )
 
   // Take all tags what i need to delete
 
@@ -134,10 +135,20 @@ const put = catchAsync(async (req: any, res: any) => {
   if (tagsNew.length !== 0){
     console.log('iam here')
     for (let i = 0; i < tagsNew.length; i++) {
-      const newTag = new Tags();
-      newTag.name = tagsNew[i].charAt(0).toUpperCase() + tagsNew[i].slice(1).toLowerCase();
-      await newTag.save()
-      selectedWorkbook.tags.push(newTag)
+      if (allTagsName.indexOf(tagsNew[i]) !== -1) {
+        const tagsFinded =  await Tags.find({
+          where:{name:tagsNew[i]}
+        }).catch((error) => {
+          throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+        });
+        selectedWorkbook.tags.push(tagsFinded[0])
+      }
+      else{
+        const newTag = new Tags();
+        newTag.name = tagsNew[i].charAt(0).toUpperCase() + tagsNew[i].slice(1).toLowerCase();
+        await newTag.save()
+        selectedWorkbook.tags.push(newTag)
+      }
     }
   }
 
