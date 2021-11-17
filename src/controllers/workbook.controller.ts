@@ -128,24 +128,29 @@ const put = catchAsync(async (req: any, res: any) => {
 
   let tagsNew = tags.filter((e:any) =>  tagsExistAdd.indexOf(e) === -1 )
 
+
   // Take all tags what i need to delete
 
-  let tagsForDelete = tagsExist.filter((e:any) =>  tags.indexOf(e) === -1 )
+
+  let tagsForDelete = tagsExist.filter((e:any) =>  tags.indexOf(e) !== -1 )
 
   if (tagsNew.length !== 0){
-    console.log('iam here')
+
     for (let i = 0; i < tagsNew.length; i++) {
-      if (allTagsName.indexOf(tagsNew[i]) !== -1) {
+      let nameUpercase = tagsNew[i].name.charAt(0).toUpperCase() + tagsNew[i].name.slice(1).toLowerCase()
+      if (allTagsName.indexOf(nameUpercase) !== -1) {
+
         const tagsFinded =  await Tags.find({
-          where:{name:tagsNew[i]}
+          where:{name:nameUpercase}
         }).catch((error) => {
           throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
         });
+        console.log(tagsFinded)
         selectedWorkbook.tags.push(tagsFinded[0])
       }
       else{
         const newTag = new Tags();
-        newTag.name = tagsNew[i].charAt(0).toUpperCase() + tagsNew[i].slice(1).toLowerCase();
+        newTag.name = tagsNew[i].name.charAt(0).toUpperCase() + tagsNew[i].name.slice(1).toLowerCase();
         await newTag.save()
         selectedWorkbook.tags.push(newTag)
       }
@@ -153,7 +158,6 @@ const put = catchAsync(async (req: any, res: any) => {
   }
 
   if (tagsForDelete.length !== 0){
-    console.log('iam here bot')
     selectedWorkbook.tags = selectedWorkbook.tags.filter((item) => !tagsForDelete.includes(item.name))
   }
 
