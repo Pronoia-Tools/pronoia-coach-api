@@ -10,6 +10,7 @@ const questionsRoute = require("./questions.route");
 const reportController = require("./report.route")
 const unitRoute = require("./unit.route");
 const imageRoute = require("./image.route");
+const utilRoute = require("./util.route");
 
 // Create routing
 const defaultRoutes = [
@@ -37,6 +38,10 @@ const defaultRoutes = [
     path: "/report",
     route: reportController,
   },
+  {
+    path: "/util",
+    route: utilRoute,
+  }
 ];
 
 const devRoutes: any[] = [
