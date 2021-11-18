@@ -12,6 +12,7 @@ import "reflect-metadata";
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const config = require('./config/config');
 
+const strypeRoute = require("./routes/stripe.route")
 const app = express();
 app.use(morgan.successHandler);
 app.use(morgan.errorHandler);
@@ -23,6 +24,8 @@ app.use(morgan.errorHandler);
 
 // set security HTTP headers
 app.use(helmet());
+
+app.use('/stripe',strypeRoute );
 
 // parse json request body
 app.use(express.json());
