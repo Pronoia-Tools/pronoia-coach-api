@@ -120,19 +120,14 @@ const put = catchAsync(async (req: any, res: any) => {
   let allTagsName = allTags.map(a => a.name)
 
   let tagsExist = selectedWorkbook?.tags.map(a => a.name)
-  let tagsExistAdd = selectedWorkbook?.tags.map(a => a.name)
 
   let { title, published, edition, language, price, currency, status, description, image, structure, tags } = req.body;
 
   // Take all tags what i need to add
 
-  let tagsNew = tags.filter((e:any) =>  tagsExistAdd.indexOf(e) === -1 )
+  let tagsNew = tags.filter((e:any) =>  tagsExist.indexOf(e) === -1 )
 
 
-  // Take all tags what i need to delete
-
-
-  let tagsForDelete = tagsExist.filter((e:any) =>  tags.indexOf(e) !== -1 )
 
   if (tagsNew.length !== 0){
 
@@ -157,8 +152,16 @@ const put = catchAsync(async (req: any, res: any) => {
     }
   }
 
-  if (tagsForDelete.length !== 0){
-    selectedWorkbook.tags = selectedWorkbook.tags.filter((item) => !tagsForDelete.includes(item.name))
+  // Take all tags what i need to delete
+
+  console.log(tagsExist)
+ 
+
+  let tagsComming = tags.map((e:any) => e.name)
+
+
+  if (tagsComming.length !== 0){
+    selectedWorkbook.tags = selectedWorkbook.tags.filter((x) => tagsComming.indexOf(x.name) !== -1)
   }
 
 
