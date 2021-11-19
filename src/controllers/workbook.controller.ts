@@ -117,7 +117,7 @@ const put = catchAsync(async (req: any, res: any) => {
 
   // Take all name tags of the workbook
 
-  let allTagsName = allTags.map(a => a.name)
+  let allTagsName = allTags.map(z => z.name)
 
   let tagsExist = selectedWorkbook?.tags.map(a => a.name)
 
@@ -125,25 +125,30 @@ const put = catchAsync(async (req: any, res: any) => {
 
   // Take all tags what i need to add
 
-  let tagsNew = tags.filter((e:any) =>  tagsExist.indexOf(e) === -1 )
+  let tagsNew = tags.filter((e:any) =>  tagsExist.indexOf(e.name) === -1 )
 
+  let tagsNewName = tagsNew.map((f:any) => f.name)
 
-
-  if (tagsNew.length !== 0){
+  if (tagsExist !== tagsNew){
 
     for (let i = 0; i < tagsNew.length; i++) {
       let nameUpercase = tagsNew[i].name.charAt(0).toUpperCase() + tagsNew[i].name.slice(1).toLowerCase()
-      if (allTagsName.indexOf(nameUpercase) !== -1) {
-
+      console.log(allTagsName)
+      console.log(nameUpercase)
+      console.log(tagsNewName)
+      console.log(allTagsName.indexOf(nameUpercase) !== -1 )
+      console.log(tagsNewName.indexOf(nameUpercase) !== -1 )
+      if ((allTagsName.indexOf(nameUpercase) !== -1) && (tagsNewName.indexOf(nameUpercase) !== -1)) {
+        console.log('entre a los usados ')
         const tagsFinded =  await Tags.find({
           where:{name:nameUpercase}
         }).catch((error) => {
           throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
         });
-        console.log(tagsFinded)
         selectedWorkbook.tags.push(tagsFinded[0])
       }
-      else{
+      if (allTagsName.indexOf(nameUpercase) === -1) {
+        console.log('entre a los nuevos')
         const newTag = new Tags();
         newTag.name = tagsNew[i].name.charAt(0).toUpperCase() + tagsNew[i].name.slice(1).toLowerCase();
         await newTag.save()
@@ -151,16 +156,16 @@ const put = catchAsync(async (req: any, res: any) => {
       }
     }
   }
+  console.log(selectedWorkbook.tags)
 
   // Take all tags what i need to delete
 
-  console.log(tagsExist)
- 
-
   let tagsComming = tags.map((e:any) => e.name)
 
+  let tagstodelete = tagsExist.filter(a => tagsComming.indexOf(a) === -1)
 
-  if (tagsComming.length !== 0){
+  if (tagsExist !== tagstodelete){
+    console.log('entre a los de borrar')
     selectedWorkbook.tags = selectedWorkbook.tags.filter((x) => tagsComming.indexOf(x.name) !== -1)
   }
 
@@ -180,6 +185,8 @@ const put = catchAsync(async (req: any, res: any) => {
   let updatedWorkbook = await selectedWorkbook.save().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
+
+  console.log(updatedWorkbook.tags)
 
   res.status(httpStatus.OK).json(updatedWorkbook);
 });
