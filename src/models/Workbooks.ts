@@ -58,6 +58,8 @@ export class Workbook extends BaseEntity {
   @JoinTable()
   tags: Tags[];
 
+  @Column('boolean', {default: false})
+  IsDeleted: boolean = false;
 }
 
 interface StructureObject {
