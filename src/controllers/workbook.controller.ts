@@ -19,7 +19,8 @@ const unit = require('../utils/sampleUnit');
 const getAll = catchAsync(async (req: any, res: any) => {
   const selectedWorkbooks = await Workbook.find({ 
     where: {
-      author: req.currentUser
+      author: req.currentUser,
+      IsDeleted:false
     },
     relations: ['author','units', 'tags']
   });
@@ -124,10 +125,13 @@ const remove = catchAsync(async (req: any, res: any) => {
       "You need to be the author to edit"
     );
 
-  let removedWorkbook = await selectedWorkbook.remove().catch((error) => {
+  selectedWorkbook.IsDeleted = true;
+
+
+  let removedWorkbook = await selectedWorkbook.save().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
-  removedWorkbook.id = Number(req.params.id);
+  
   res.status(httpStatus.OK).json(removedWorkbook);
 
 });
