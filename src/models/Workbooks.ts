@@ -46,6 +46,9 @@ export class Workbook extends BaseEntity {
 
   @Column({ type: "text" })
   description: string;
+  
+  @Column('boolean', {default: false})
+  IsDeleted: boolean = false;
 
   @Column("json", { nullable: false, default: {tree: []} })
   structure: StructureObject;
