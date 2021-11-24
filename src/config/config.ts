@@ -9,6 +9,7 @@ const envVarsSchema = Joi.object()
     NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
     VERSION: Joi.string().default('NON_GIVEN').description('API Version'),
     PORT: Joi.number().default(3000),
+    URL: Joi.string().default('http://localhost:3000'),
     DB_TYPE: Joi.string().valid('sqlite', 'sqlite3', 'postgres').required().description('DB Type'),
     DB_HOST: Joi.string().default('./database.sqlite').required().description('DB Host'),
     DB_PORT: Joi.string().required().description('DB Port'),
@@ -32,7 +33,11 @@ const envVarsSchema = Joi.object()
     FIREBASE_ADMIN_TOKEN_URI: Joi.string().required().description('Firebase Admin Token Uri.'),
     FIREBASE_ADMIN_AUTH_PROVIDER_X509_CERT_URL: Joi.string().required().description('Firebase Admin Auth Provider.'),
     FIREBASE_ADMIN_CLIENT_X509_CERT_URL: Joi.string().required().description('Firebase Admin Client Cert Url.'),
-
+    STRIPE_SECRET_KEY: Joi.string().required().description('Stripe Secret Key.'),
+    STRIPE_1: Joi.string().required().description('Stripe 1.'),
+    STRIPE_2: Joi.string().required().description('Stripe 2.'),
+    STRIPE_3: Joi.string().required().description('Stripe 3.'),
+    STRIPE_PRE_LAUNCH: Joi.string().required().description('Stripe Pre Launch.'),
     })
   .unknown();
 
@@ -54,6 +59,7 @@ const settings = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   version: envVars.VERSION,
+  url: envVars.URL,
   firebase: {
     apiKey: envVars.FIREBASE_API_KEY,
     authDomain: envVars.FIREBASE_AUTH_DOMAIN,
@@ -83,6 +89,13 @@ const settings = {
     password: envVars.DB_PASSWORD,
     database: envVars.DB_DATABASE
   },
+  stripe: {
+    secretKey: envVars.STRIPE_SECRET_KEY,
+    price_1: envVars.STRIPE_1,
+    price_2: envVars.STRIPE_2,
+    Proce_3: envVars.STRIPE_3,
+    preLaunch: envVars.STRIPE_PRE_LAUNCH
+  }
 };
 
 module.exports = settings;

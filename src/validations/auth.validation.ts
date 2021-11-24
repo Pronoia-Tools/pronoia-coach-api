@@ -10,6 +10,9 @@ const register = {
     password: Joi.string().required().custom(password),
     country: Joi.string().required(),
     notify: Joi.boolean().required(),
+    listing_badge: Joi.string().required(),
+    newsletter: Joi.boolean().required(),
+    pre_launch: Joi.boolean().required(),
   }),
 };
 const updateUser = {

@@ -37,6 +37,15 @@ export class User extends BaseEntity {
   @Column({ default: false })
   notify: boolean;
 
+  @Column({ length: 100, default: "" })
+  listing_badge: string;
+
+  @Column({ default: false })
+  newsletter: boolean;
+
+  @Column({ default: false })
+  pre_launch: boolean;
+
   @Column({ default: false })
   isVerified: boolean;
 
@@ -51,4 +60,11 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Unit, (unit) => unit.owner)
   units: Unit[];
+
+  // add column for strip customer id
+  @Column({ length: 100, default: "" })
+  stripeCustomerId: string;
+
+  @Column({ default: false })
+  autorized: boolean;
 }

@@ -10,6 +10,12 @@ const catchAsync = require("../utils/catchAsync");
 const ApiError = require("../utils/ApiError");
 const pick = require("../utils/pick");
 
+const config = require('../config/config');
+const stripe = require('stripe')(config.stripe.secretKey);
+
+const { badgeList } = require('../config/badges');
+
+import { object } from "joi";
 /** Schemas */
 import { User } from "../models/User";
 
@@ -22,8 +28,8 @@ import { User } from "../models/User";
 
 const register = catchAsync(async (req: any, res: any) => {
   let body = req.body;
-  let { firstname, lastname, email, password, country, notify } = body;
-
+  let { firstname, lastname, email, password, country, notify, listing_badge, newsletter, pre_launch } = body;
+ 
   const userPass: any[] = [];
   await admin
     .auth()
@@ -57,15 +63,23 @@ const register = catchAsync(async (req: any, res: any) => {
       throw new ApiError(code, error.message);
     });
 
+    const stripe_customer = await stripe.customers.create({
+      email: email,
+      name: firstname + " " + lastname,
+    });
+
   const user = new User();
   user.firstName = firstname;
   user.lastName = lastname;
   user.email = email;
   user.country = country;
-  user.country = country;
   user.notify = notify;
   user.uuid = userPass[1];
   user.isVerified = false
+  user.listing_badge = listing_badge;
+  user.newsletter = newsletter;
+  user.pre_launch = pre_launch;
+  user.stripeCustomerId = stripe_customer.id;
 
   await user.save().catch((error: any) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
@@ -98,9 +112,39 @@ const register = catchAsync(async (req: any, res: any) => {
       "Could not retrieve token."
     );
 
+    const listItems = []
+    let badge = badgeList.find((badge: any) => badge.name === listing_badge);
+          
+    if (badge.stripe_price !== "") {
+      listItems.push({
+        price: badge.stripe_price,
+        quantity: 1,
+      });
+    }
+   
+    if (pre_launch) {
+      listItems.push({
+        price: config.stripe.preLaunch,
+        quantity:1
+      })
+    }
+
+    let session = {}
+    if(listItems.length > 0) {
+      session = await stripe.checkout.sessions.create({
+        customer: stripe_customer.id,
+        payment_method_types: ["card"],
+        line_items: listItems,
+        mode: "payment",
+        success_url: `${config.url}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${config.url}/cancel`,
+      });
+    } 
+    
   res.status(httpStatus.OK).json({
-    user: pick(user, ["id", "firstName", "lastName", "email", "country", "notify"]),
+    user: pick(user, ["id", "firstName", "lastName", "email", "country", "notify", "listing_badge", "newsletter", "pre_launch", "stripeCustomerId"]),
     token: token,
+    stripe_session: session
   });
 });
 
@@ -220,7 +264,7 @@ const login = catchAsync(async (req: any, res: any) => {
     });
   }
   res.status(httpStatus.OK).json({
-    user: pick(currentUser, ["firstName", "lastName", "email", "country"]),
+    user: pick(currentUser, ["firstName", "lastName", "email", "country", "authorized"]),
     token: token,
   });
 });
@@ -247,6 +291,9 @@ const restorePassword = catchAsync(async (req: any, res: any) => {
   
   res.status(httpStatus.OK).json({email});
 });
+
+// endpoint to create a stripe checkout session
+
 
 // const logout = catchAsync(async (req, res) => {
 //   await authService.logout(req.body.refreshToken);
