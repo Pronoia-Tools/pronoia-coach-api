@@ -21,6 +21,10 @@ app.use(morgan.errorHandler);
 // app.set('view engine', 'jade');
 // app.use(express.static(path.join(__dirname, 'public')));
 
+// enable cors
+app.use(cors());
+app.options('*', cors());
+
 // set security HTTP headers
 app.use(helmet());
 
@@ -35,10 +39,6 @@ app.use(xss());
 
 // gzip compression
 app.use(compression());
-
-// enable cors
-app.use(cors());
-app.options('*', cors());
 
 // parse cookies
 app.use(cookieParser());
