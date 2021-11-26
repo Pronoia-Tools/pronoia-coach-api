@@ -1,7 +1,7 @@
 export {};
 /** Node Modules */
 const httpStatus = require("http-status");
-const { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateEmail, updatePassword   } = require("firebase/auth");
+const { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateEmail, updatePassword, createCustomToken   } = require("firebase/auth");
 
 
 /** Custom Modules */
@@ -231,11 +231,14 @@ const login = catchAsync(async (req: any, res: any) => {
 
 
   let token = "";
+  let uid = "";
   let isVerified = false;
   const auth = getAuth()
   await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential: any) => {
       token = userCredential.user.accessToken;
+      uid = userCredential.user.uid
+      console.log(uid)
       isVerified = userCredential.user.emailVerified;
     })
     .catch((error: any) => {
@@ -249,6 +252,18 @@ const login = catchAsync(async (req: any, res: any) => {
         message = error.message;
       }
       throw new ApiError(code, message);
+    });
+
+  let customToken = ""
+  const admin = require("../config/firebaseAdmin").firebase_admin_connect();
+  await admin.auth().createCustomToken(uid)
+    .then((resCustomToken:any) => {
+      // Send token back to client
+      customToken=resCustomToken
+      console.log({customToken})
+    })
+    .catch((error:any) => {
+      console.log('Error creating custom token:', error);
     });
 
   if (token === "")
@@ -266,13 +281,26 @@ const login = catchAsync(async (req: any, res: any) => {
   res.status(httpStatus.OK).json({
     user: pick(currentUser, ["firstName", "lastName", "email", "country", "authorized"]),
     token: token,
+    customToken
   });
 });
 
 const refresh = catchAsync(async (req: any, res: any) => {
+  let customToken = ""
+  const admin = require("../config/firebaseAdmin").firebase_admin_connect();
+  await admin.auth().createCustomToken(req.currentUser.uuid)
+    .then((resCustomToken:any) => {
+      // Send token back to client
+      customToken=resCustomToken
+      console.log({customToken})
+    })
+    .catch((error:any) => {
+      console.log('Error creating custom token:', error);
+    });
   res.status(httpStatus.OK).json({
     user: pick(req.currentUser, ["firstName", "lastName", "email", "country"]),
     token: req.get('authorization').replace('Bearer ', ''),
+    customToken
   });
 });
 
