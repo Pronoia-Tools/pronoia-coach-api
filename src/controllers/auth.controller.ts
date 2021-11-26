@@ -136,6 +136,7 @@ const register = catchAsync(async (req: any, res: any) => {
         payment_method_types: ["card"],
         line_items: listItems,
         mode: "payment",
+        allow_promotion_codes: true,
         success_url: `${config.url}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${config.url}/cancel`,
       });
