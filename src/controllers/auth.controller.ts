@@ -238,7 +238,6 @@ const login = catchAsync(async (req: any, res: any) => {
     .then((userCredential: any) => {
       token = userCredential.user.accessToken;
       uid = userCredential.user.uid
-      console.log(uid)
       isVerified = userCredential.user.emailVerified;
     })
     .catch((error: any) => {
@@ -254,13 +253,12 @@ const login = catchAsync(async (req: any, res: any) => {
       throw new ApiError(code, message);
     });
 
-  let customToken = ""
+  let customTokenAuthFirebase = ""
   const admin = require("../config/firebaseAdmin").firebase_admin_connect();
   await admin.auth().createCustomToken(uid)
     .then((resCustomToken:any) => {
       // Send token back to client
-      customToken=resCustomToken
-      console.log({customToken})
+      customTokenAuthFirebase=resCustomToken
     })
     .catch((error:any) => {
       console.log('Error creating custom token:', error);
@@ -281,18 +279,18 @@ const login = catchAsync(async (req: any, res: any) => {
   res.status(httpStatus.OK).json({
     user: pick(currentUser, ["firstName", "lastName", "email", "country", "authorized"]),
     token: token,
-    customToken
+    customTokenAuthFirebase
   });
 });
 
 const refresh = catchAsync(async (req: any, res: any) => {
-  let customToken = ""
+  let customTokenAuthFirebase = ""
   const admin = require("../config/firebaseAdmin").firebase_admin_connect();
   await admin.auth().createCustomToken(req.currentUser.uuid)
     .then((resCustomToken:any) => {
       // Send token back to client
-      customToken=resCustomToken
-      console.log({customToken})
+      customTokenAuthFirebase=resCustomToken
+      // console.log({customTokenAuthFirebase})
     })
     .catch((error:any) => {
       console.log('Error creating custom token:', error);
@@ -300,7 +298,7 @@ const refresh = catchAsync(async (req: any, res: any) => {
   res.status(httpStatus.OK).json({
     user: pick(req.currentUser, ["firstName", "lastName", "email", "country"]),
     token: req.get('authorization').replace('Bearer ', ''),
-    customToken
+    customTokenAuthFirebase
   });
 });
 
