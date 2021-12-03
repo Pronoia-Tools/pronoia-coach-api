@@ -49,6 +49,9 @@ export class User extends BaseEntity {
   @Column({ default: false })
   isVerified: boolean;
 
+  @Column({ default: '' })
+  businessname : string;
+
   @OneToMany(() => Workbook, (workbook) => workbook.author)
   workbooks: Workbook[];
   
