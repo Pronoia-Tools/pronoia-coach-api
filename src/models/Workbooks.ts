@@ -46,7 +46,7 @@ export class Workbook extends BaseEntity {
 
   @Column({ type: "text" })
   description: string;
-  
+
   @Column('boolean', {default: false})
   IsDeleted: boolean = false;
 
@@ -60,6 +60,10 @@ export class Workbook extends BaseEntity {
   @ManyToMany(() => Tags)
   @JoinTable()
   tags: Tags[];
+
+  @ManyToMany(() => User)
+  @JoinTable()
+  users: User[];
 
 }
 

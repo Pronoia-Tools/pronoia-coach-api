@@ -4,6 +4,8 @@ import {
   OneToMany,
   Column,
   BaseEntity,
+  ManyToMany,
+  JoinTable,
 } from "typeorm";
 
 import { Workbook } from "./Workbooks";
@@ -51,7 +53,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Workbook, (workbook) => workbook.author)
   workbooks: Workbook[];
-  
+
   @OneToMany(() => Report, (report) => report.author)
   reports: Report[];
 
@@ -67,4 +69,8 @@ export class User extends BaseEntity {
 
   @Column({ default: false })
   autorized: boolean;
+
+  @ManyToMany(() => Workbook)
+  @JoinTable()
+  myworkbooks: Workbook[];
 }
