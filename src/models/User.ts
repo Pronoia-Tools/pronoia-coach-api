@@ -69,5 +69,5 @@ export class User extends BaseEntity {
   stripeCustomerId: string;
 
   @Column({ default: false })
-  autorized: boolean;
+  authorized: boolean;
 }
