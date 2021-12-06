@@ -6,6 +6,7 @@ const admin = require("../config/firebaseAdmin").firebase_admin_connect();
 
 // const { roleRights } = require('../config/roles');
 import { User } from "../models/User";
+import {getRepository} from "typeorm";
 
 // const verifyCallback = (req: any, resolve: any, reject: any, requiredRights: any) => async (err: any, user: any, info: any) => {
 //   if (err || info || !user) {
@@ -43,7 +44,11 @@ const auth = (...requiredRights: any) => async (req: any, res: any, next: any) =
     next(new ApiError(httpStatus.FORBIDDEN, 'Forbidden'))
   }
 
-  const currentUser = await User.findOne({ email: info.email });
+  const currentUser = await getRepository(User)
+    .createQueryBuilder('user')
+    .where('LOWER(user.email) = LOWER(:email)', { email: info.email })
+    .getOne();
+
   if (!currentUser) {
     throw new ApiError(
       httpStatus.NOT_FOUND,
