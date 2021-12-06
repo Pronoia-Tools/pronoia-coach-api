@@ -144,7 +144,7 @@ const register = catchAsync(async (req: any, res: any) => {
     } 
     
   res.status(httpStatus.OK).json({
-    user: pick(user, ["id", "firstName", "lastName", "email", "country", "notify", "listing_badge", "newsletter", "pre_launch", "stripeCustomerId"]),
+    user: pick(user, ["id", "firstName", "lastName", "email", "country", "notify", "listing_badge", "newsletter", "pre_launch", "stripeCustomerId", "authorized", "businessname"]),
     token: token,
     stripe_session: session
   });
@@ -299,7 +299,7 @@ const refresh = catchAsync(async (req: any, res: any) => {
       console.log('Error creating custom token:', error);
     });
   res.status(httpStatus.OK).json({
-    user: pick(req.currentUser, ["firstName", "lastName", "email", "country","businessname"]),
+    user: pick(req.currentUser, ["firstName", "lastName", "email", "country","businessname", "authorized"]),
     token: req.get('authorization').replace('Bearer ', ''),
     customTokenAuthFirebase
   });
