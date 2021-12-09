@@ -10,6 +10,7 @@ import { Workbook } from "./Workbooks";
 import { Image } from "./Images";
 import { Report } from "./Report";
 import { Unit } from "./Unit";
+import { Answer } from "./Answers";
 
 @Entity()
 export class User extends BaseEntity {
@@ -63,6 +64,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Unit, (unit) => unit.owner)
   units: Unit[];
+
+  @OneToMany(() => Answer, (answer) => answer.owner)
+  answers: Answer[];
 
   // add column for strip customer id
   @Column({ length: 100, default: "" })
