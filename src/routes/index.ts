@@ -11,6 +11,7 @@ const reportController = require("./report.route")
 const unitRoute = require("./unit.route");
 const imageRoute = require("./image.route");
 const utilRoute = require("./util.route");
+const answerRoute = require("./answer.route");
 
 // Create routing
 const defaultRoutes = [
@@ -41,6 +42,10 @@ const defaultRoutes = [
   {
     path: "/util",
     route: utilRoute,
+  },
+  {
+    path: "/answer",
+    route: answerRoute,
   }
 ];
 
