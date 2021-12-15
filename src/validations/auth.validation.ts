@@ -13,6 +13,7 @@ const register = {
     listing_badge: Joi.string().required(),
     newsletter: Joi.boolean().required(),
     pre_launch: Joi.boolean().required(),
+    businessname: Joi.string(),
   }),
 };
 const updateUser = {
@@ -22,6 +23,7 @@ const updateUser = {
     currentEmail: Joi.string().required().email(),
     newEmail: Joi.string().required().email(),
     country: Joi.string().required(),
+    businessname: Joi.string()
   }),
 };
 const updatePassword = {

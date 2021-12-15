@@ -28,7 +28,7 @@ import { User } from "../models/User";
 
 const register = catchAsync(async (req: any, res: any) => {
   let body = req.body;
-  let { firstname, lastname, email, password, country, notify, listing_badge, newsletter, pre_launch } = body;
+  let { firstname, lastname, email, password, country, notify, listing_badge, newsletter, pre_launch, businessname } = body;
  
   const userPass: any[] = [];
   await admin
@@ -80,6 +80,7 @@ const register = catchAsync(async (req: any, res: any) => {
   user.newsletter = newsletter;
   user.pre_launch = pre_launch;
   user.stripeCustomerId = stripe_customer.id;
+  user.businessname = businessname
 
   await user.save().catch((error: any) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
@@ -143,14 +144,14 @@ const register = catchAsync(async (req: any, res: any) => {
     } 
     
   res.status(httpStatus.OK).json({
-    user: pick(user, ["id", "firstName", "lastName", "email", "country", "notify", "listing_badge", "newsletter", "pre_launch", "stripeCustomerId"]),
+    user: pick(user, ["id", "firstName", "lastName", "email", "country", "notify", "listing_badge", "newsletter", "pre_launch", "stripeCustomerId", "authorized", "businessname"]),
     token: token,
     stripe_session: session
   });
 });
 
 const updateUser = catchAsync(async (req: any, res: any) => {
-  const { firstname, lastname, currentEmail, newEmail, country, newPassword, currentPassword } = req.body;
+  const { firstname, lastname, currentEmail, newEmail, country, newPassword, currentPassword, businessname } = req.body;
 
   const currentUser = await User.findOne({email:currentEmail});
   if (!currentUser) {
@@ -177,7 +178,8 @@ const updateUser = catchAsync(async (req: any, res: any) => {
     firstName:firstname,
     lastName:lastname,
     country:country,
-    email:newEmail
+    email:newEmail,
+    businessname:businessname
   });
   const results = await User.save(currentUser);
 
@@ -278,7 +280,7 @@ const login = catchAsync(async (req: any, res: any) => {
     });
   }
   res.status(httpStatus.OK).json({
-    user: pick(currentUser, ["firstName", "lastName", "email", "country", "authorized"]),
+    user: pick(currentUser, ["firstName", "lastName", "email", "country", "authorized","businessname"]),
     token: token,
     customTokenAuthFirebase
   });
@@ -297,7 +299,7 @@ const refresh = catchAsync(async (req: any, res: any) => {
       console.log('Error creating custom token:', error);
     });
   res.status(httpStatus.OK).json({
-    user: pick(req.currentUser, ["firstName", "lastName", "email", "country"]),
+    user: pick(req.currentUser, ["firstName", "lastName", "email", "country","businessname", "authorized"]),
     token: req.get('authorization').replace('Bearer ', ''),
     customTokenAuthFirebase
   });

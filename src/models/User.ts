@@ -12,6 +12,7 @@ import { Workbook } from "./Workbooks";
 import { Image } from "./Images";
 import { Report } from "./Report";
 import { Unit } from "./Unit";
+import { shareWB } from "./shareWB";
 
 @Entity()
 export class User extends BaseEntity {
@@ -51,6 +52,9 @@ export class User extends BaseEntity {
   @Column({ default: false })
   isVerified: boolean;
 
+  @Column({ default: '' })
+  businessname : string;
+
   @OneToMany(() => Workbook, (workbook) => workbook.author)
   workbooks: Workbook[];
 
@@ -63,14 +67,13 @@ export class User extends BaseEntity {
   @OneToMany(() => Unit, (unit) => unit.owner)
   units: Unit[];
 
+  @OneToMany(() => shareWB, (shared) => shared.id)
+  sharedId: shareWB[];
+
   // add column for strip customer id
   @Column({ length: 100, default: "" })
   stripeCustomerId: string;
 
   @Column({ default: false })
-  autorized: boolean;
-
-  @ManyToMany(() => Workbook)
-  @JoinTable()
-  myworkbooks: Workbook[];
+  authorized: boolean;
 }

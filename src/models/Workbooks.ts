@@ -11,6 +11,7 @@ import {
 import { User } from "./User";
 import { Unit } from "./Unit";
 import { Tags } from "./Tags";
+import { shareWB } from "./shareWB";
 
 @Entity()
 export class Workbook extends BaseEntity {
@@ -52,6 +53,10 @@ export class Workbook extends BaseEntity {
 
   @Column("json", { nullable: false, default: {tree: []} })
   structure: StructureObject;
+
+  @OneToMany(() => shareWB, (shared) => shared.id)
+  sharedId: shareWB[];
+
 
   @ManyToMany(() => Unit)
   @JoinTable()
