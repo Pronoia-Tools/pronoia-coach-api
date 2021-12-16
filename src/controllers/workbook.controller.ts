@@ -17,9 +17,9 @@ import { Tags } from "../models/Tags";
 const unit = require('../utils/sampleUnit');
 
 const getAll = catchAsync(async (req: any, res: any) => {
-  const selectedWorkbooks = await Workbook.find({ 
+  const selectedWorkbooks = await Workbook.find({
     where: {
-      author: req.currentUser,
+      sharedWB: req.currentUser,
       IsDeleted:false
     },
     relations: ['author','units', 'tags']
@@ -27,12 +27,23 @@ const getAll = catchAsync(async (req: any, res: any) => {
   res.status(httpStatus.OK).json(selectedWorkbooks);
 });
 
+/* const getAllShared = catchAsync(async (req: any, res: any) => {
+  const selectedWorkbooks = await Workbook.find({
+    where: {
+      author: req.currentUser,
+      IsDeleted:false
+    },
+    relations: ['author','units', 'tags']
+  });
+  res.status(httpStatus.OK).json(selectedWorkbooks);
+}); */
+
 const get = catchAsync(async (req: any, res: any) => {
   const selectedWorkbook = await Workbook.findOne({
     where:{
       id: req.params.id
     },
-    relations: ['author', 'units', 'tags']
+    relations: ['author', 'units', 'tags','sharedWB']
   });
   res.status(httpStatus.OK).json({ selectedWorkbook });
 });

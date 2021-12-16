@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   BaseEntity,
+  JoinColumn,
   ManyToOne,
 } from "typeorm";
 
@@ -18,8 +19,10 @@ export class shareWB extends BaseEntity {
   permissions: {};
 
   @ManyToOne(() => User, (user) => user.id)
-  owners: User[];
+  @JoinColumn({name:'ownersId'})
+  ownersId: User[];
 
   @ManyToOne(() => Workbook, (workbook) => workbook.id)
-  workbooks: Workbook;
+  @JoinColumn({name:'workbooksId'})
+  workbooksId: Workbook;
 }

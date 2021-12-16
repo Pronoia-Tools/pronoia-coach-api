@@ -54,9 +54,8 @@ export class Workbook extends BaseEntity {
   @Column("json", { nullable: false, default: {tree: []} })
   structure: StructureObject;
 
-  @OneToMany(() => shareWB, (shared) => shared.id)
-  sharedId: shareWB[];
-
+  @OneToMany(() => shareWB, shared => shared.id)
+  sharedWB: shareWB[];
 
   @ManyToMany(() => Unit)
   @JoinTable()
