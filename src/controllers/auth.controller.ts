@@ -1,7 +1,7 @@
-export { };
+export {};
 /** Node Modules */
 const httpStatus = require("http-status");
-const { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateEmail, updatePassword, createCustomToken } = require("firebase/auth");
+const { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateEmail, updatePassword, createCustomToken   } = require("firebase/auth");
 
 
 /** Custom Modules */
@@ -12,7 +12,6 @@ const pick = require("../utils/pick");
 
 const config = require('../config/config');
 const stripe = require('stripe')(config.stripe.secretKey);
-const mailchip = config.mailchip;
 
 const { badgeList } = require('../config/badges');
 
@@ -22,7 +21,7 @@ import { User } from "../models/User";
 
 // const getToken = (email: string, password: string) => {
 //   let token = "";
-
+  
 
 //     return token;
 // }
@@ -30,7 +29,7 @@ import { User } from "../models/User";
 const register = catchAsync(async (req: any, res: any) => {
   let body = req.body;
   let { firstname, lastname, email, password, country, notify, listing_badge, newsletter, pre_launch, businessname } = body;
-
+ 
   const userPass: any[] = [];
   await admin
     .auth()
@@ -64,10 +63,10 @@ const register = catchAsync(async (req: any, res: any) => {
       throw new ApiError(code, error.message);
     });
 
-  const stripe_customer = await stripe.customers.create({
-    email: email,
-    name: firstname + " " + lastname,
-  });
+    const stripe_customer = await stripe.customers.create({
+      email: email,
+      name: firstname + " " + lastname,
+    });
 
   const user = new User();
   user.firstName = firstname;
@@ -93,7 +92,7 @@ const register = catchAsync(async (req: any, res: any) => {
   await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential: any) => {
       token = userCredential.user.accessToken;
-      return sendEmailVerification(auth.currentUser);
+      return  sendEmailVerification(auth.currentUser);
     })
     .catch((error: any) => {
       let code = httpStatus.INTERNAL_SERVER_ERROR;
@@ -114,58 +113,36 @@ const register = catchAsync(async (req: any, res: any) => {
       "Could not retrieve token."
     );
 
-  const listItems = []
-  let badge = badgeList.find((badge: any) => badge.name === listing_badge);
+    const listItems = []
+    let badge = badgeList.find((badge: any) => badge.name === listing_badge);
+          
+    if (badge.stripe_price !== "") {
+      listItems.push({
+        price: badge.stripe_price,
+        quantity: 1,
+      });
+    }
+   
+    if (pre_launch) {
+      listItems.push({
+        price: config.stripe.preLaunch,
+        quantity:1
+      })
+    }
 
-  if (badge && badge.stripe_price !== "") {
-    listItems.push({
-      price: badge.stripe_price,
-      quantity: 1,
-    });
-  }
-
-  if (pre_launch) {
-    listItems.push({
-      price: config.stripe.preLaunch,
-      quantity: 1
-    })
-  }
-
-  let session = {}
-  if (listItems.length > 0) {
-    session = await stripe.checkout.sessions.create({
-      customer: stripe_customer.id,
-      payment_method_types: ["card"],
-      line_items: listItems,
-      mode: "payment",
-      allow_promotion_codes: true,
-      success_url: `${config.url}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${config.url}/cancel`,
-    });
-  }
-
-  // if (mailchip != '') {
-  //   //use mailchimp api and add suscriber
-  //   const mailchimp = require('mailchimp-api-v3');
-  //   const mailchimp_api = new mailchimp(mailchip);
-  //   const data = {
-  //     email_address: email,
-  //     status: 'subscribed',
-  //     merge_fields: {
-  //       FNAME: firstname,
-  //       LNAME: lastname,
-  //       COUNTRY: country,
-  //       NOTIFY: notify,
-  //       LISTING_BADGE: listing_badge,
-  //       NEWSLETTER: newsletter,
-  //       PRE_LAUNCH: pre_launch,
-  //       BUSINESSNAME: businessname
-  //     }
-  //   };
-  //   await mailchimp_api.post('/lists/' + config.mailchip.listId + '/members', data).catch((error: any) => {
-  //     console.log(error);
-  //   });
-  // }
+    let session = {}
+    if(listItems.length > 0) {
+      session = await stripe.checkout.sessions.create({
+        customer: stripe_customer.id,
+        payment_method_types: ["card"],
+        line_items: listItems,
+        mode: "payment",
+        allow_promotion_codes: true,
+        success_url: `${config.url}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${config.url}/cancel`,
+      });
+    } 
+    
   res.status(httpStatus.OK).json({
     user: pick(user, ["id", "firstName", "lastName", "email", "country", "notify", "listing_badge", "newsletter", "pre_launch", "stripeCustomerId", "authorized", "businessname"]),
     token: token,
@@ -176,7 +153,7 @@ const register = catchAsync(async (req: any, res: any) => {
 const updateUser = catchAsync(async (req: any, res: any) => {
   const { firstname, lastname, currentEmail, newEmail, country, newPassword, currentPassword, businessname } = req.body;
 
-  const currentUser = await User.findOne({ email: currentEmail });
+  const currentUser = await User.findOne({email:currentEmail});
   if (!currentUser) {
     throw new ApiError(
       httpStatus.NOT_FOUND,
@@ -193,16 +170,16 @@ const updateUser = catchAsync(async (req: any, res: any) => {
     } catch (error) {
       throw new ApiError(
         httpStatus.NOT_FOUND,
-        "" + error
+        ""+error
       );
     }
   }
   User.merge(currentUser, {
-    firstName: firstname,
-    lastName: lastname,
-    country: country,
-    email: newEmail,
-    businessname: businessname
+    firstName:firstname,
+    lastName:lastname,
+    country:country,
+    email:newEmail,
+    businessname:businessname
   });
   const results = await User.save(currentUser);
 
@@ -210,12 +187,12 @@ const updateUser = catchAsync(async (req: any, res: any) => {
     user: pick(results, ["email", "firstName", "lastName", "country"]),
     needReauthenticate
   });
-
+  
 });
 const updateUserPassword = catchAsync(async (req: any, res: any) => {
   const { email, newPassword, currentPassword } = req.body;
 
-  const currentUser = await User.findOne({ email: email });
+  const currentUser = await User.findOne({email:email});
   if (!currentUser) {
     throw new ApiError(
       httpStatus.NOT_FOUND,
@@ -224,24 +201,24 @@ const updateUserPassword = catchAsync(async (req: any, res: any) => {
   }
   const auth = getAuth()
   await signInWithEmailAndPassword(auth, email, currentPassword)
-    .then((userCredential: any) => {
-      return updatePassword(auth.currentUser, newPassword)
-    })
-    .catch((error: any) => {
-      let code = httpStatus.INTERNAL_SERVER_ERROR;
-      let message = error.message;
-      if (error.code === "auth/wrong-password") {
-        code = httpStatus.UNAUTHORIZED;
-        message = "Old password isn't valid";
-      } else if (error.code === "auth/too-many-requests") {
-        code = httpStatus.TOO_MANY_REQUESTS;
-        message = error.message;
-      }
-      throw new ApiError(code, message);
-    });
-
-  res.status(httpStatus.OK).json({ email });
-
+  .then((userCredential: any) => {
+    return updatePassword(auth.currentUser, newPassword)
+  })
+  .catch((error: any) => {
+    let code = httpStatus.INTERNAL_SERVER_ERROR;
+    let message = error.message;
+    if (error.code === "auth/wrong-password") {
+      code = httpStatus.UNAUTHORIZED;
+      message = "Old password isn't valid";
+    } else if (error.code === "auth/too-many-requests") {
+      code = httpStatus.TOO_MANY_REQUESTS;
+      message = error.message;
+    }
+    throw new ApiError(code, message);
+  });
+  
+  res.status(httpStatus.OK).json({email});
+  
 });
 
 const login = catchAsync(async (req: any, res: any) => {
@@ -282,11 +259,11 @@ const login = catchAsync(async (req: any, res: any) => {
   let customTokenAuthFirebase = ""
   const admin = require("../config/firebaseAdmin").firebase_admin_connect();
   await admin.auth().createCustomToken(uid)
-    .then((resCustomToken: any) => {
+    .then((resCustomToken:any) => {
       // Send token back to client
-      customTokenAuthFirebase = resCustomToken
+      customTokenAuthFirebase=resCustomToken
     })
-    .catch((error: any) => {
+    .catch((error:any) => {
       console.log('Error creating custom token:', error);
     });
 
@@ -303,7 +280,7 @@ const login = catchAsync(async (req: any, res: any) => {
     });
   }
   res.status(httpStatus.OK).json({
-    user: pick(currentUser, ["firstName", "lastName", "email", "country", "authorized", "businessname"]),
+    user: pick(currentUser, ["firstName", "lastName", "email", "country", "authorized","businessname"]),
     token: token,
     customTokenAuthFirebase
   });
@@ -313,16 +290,16 @@ const refresh = catchAsync(async (req: any, res: any) => {
   let customTokenAuthFirebase = ""
   const admin = require("../config/firebaseAdmin").firebase_admin_connect();
   await admin.auth().createCustomToken(req.currentUser.uuid)
-    .then((resCustomToken: any) => {
+    .then((resCustomToken:any) => {
       // Send token back to client
-      customTokenAuthFirebase = resCustomToken
+      customTokenAuthFirebase=resCustomToken
       // console.log({customTokenAuthFirebase})
     })
-    .catch((error: any) => {
+    .catch((error:any) => {
       console.log('Error creating custom token:', error);
     });
   res.status(httpStatus.OK).json({
-    user: pick(req.currentUser, ["firstName", "lastName", "email", "country", "businessname", "authorized"]),
+    user: pick(req.currentUser, ["firstName", "lastName", "email", "country","businessname", "authorized"]),
     token: req.get('authorization').replace('Bearer ', ''),
     customTokenAuthFirebase
   });
@@ -336,12 +313,12 @@ const logout = catchAsync(async (req: any, res: any) => {
 
 const restorePassword = catchAsync(async (req: any, res: any) => {
   const { email } = req.body
-
-  await sendPasswordResetEmail(getAuth(), email).catch((error: any) => {
+  
+  await sendPasswordResetEmail(getAuth(), email).catch((error:any) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
-
-  res.status(httpStatus.OK).json({ email });
+  
+  res.status(httpStatus.OK).json({email});
 });
 
 // endpoint to create a stripe checkout session
