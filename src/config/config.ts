@@ -38,7 +38,6 @@ const envVarsSchema = Joi.object()
     STRIPE_2: Joi.string().required().description('Stripe 2.'),
     STRIPE_3: Joi.string().required().description('Stripe 3.'),
     STRIPE_PRE_LAUNCH: Joi.string().required().description('Stripe Pre Launch.'),
-    MAILCHIP_API_KEY: Joi.string().default('').description('Mailchimp ApiKey.'),
     })
   .unknown();
 
@@ -96,9 +95,6 @@ const settings = {
     price_2: envVars.STRIPE_2,
     Proce_3: envVars.STRIPE_3,
     preLaunch: envVars.STRIPE_PRE_LAUNCH
-  },
-  mailchimp: {
-    apiKey: envVars.MAILCHIP_API_KEY
   }
 };
 
