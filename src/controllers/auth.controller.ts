@@ -116,7 +116,7 @@ const register = catchAsync(async (req: any, res: any) => {
     const listItems = []
     let badge = badgeList.find((badge: any) => badge.name === listing_badge);
           
-    if (badge.stripe_price !== "") {
+    if (badge && badge.stripe_price !== "") {
       listItems.push({
         price: badge.stripe_price,
         quantity: 1,
