@@ -189,6 +189,11 @@ const updateUser = catchAsync(async (req: any, res: any) => {
   });
   
 });
+
+const getUser = catchAsync(async (req: any, res: any) => {
+  const user = req.currentUser
+  res.status(httpStatus.OK).json({user});
+});
 const updateUserPassword = catchAsync(async (req: any, res: any) => {
   const { email, newPassword, currentPassword } = req.body;
 
@@ -363,7 +368,8 @@ module.exports = {
   logout,
   restorePassword,
   updateUser,
-  updateUserPassword
+  updateUserPassword,
+  getUser
   // refreshTokens,
   // forgotPassword,
   // resetPassword,

@@ -9,6 +9,7 @@ const router = express.Router();
 
 // router.get('/', (req: any, res:any) => {return res.status(200);})
 router.post('/register', validate(authValidation.register), authController.register);
+router.get('/user', auth(), authController.getUser);
 router.put('/user', [validate(authValidation.updateUser),auth()], authController.updateUser);
 router.put('/password', [validate(authValidation.updatePassword),auth()], authController.updateUserPassword);
 router.post('/login', validate(authValidation.login), authController.login);
