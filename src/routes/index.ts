@@ -6,6 +6,7 @@ const config = require("../config/config");
 // Import routes
 const authRoute = require("./auth.route");
 const workbookRoute = require("./workbook.route");
+const directoryRoute = require("./directory.route");
 const questionsRoute = require("./questions.route");
 const reportController = require("./report.route")
 const unitRoute = require("./unit.route");
@@ -41,6 +42,10 @@ const defaultRoutes = [
   {
     path: "/util",
     route: utilRoute,
+  },
+  {
+    path: "/directory",
+    route: directoryRoute,
   }
 ];
 
