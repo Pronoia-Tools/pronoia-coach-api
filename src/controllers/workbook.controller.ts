@@ -17,7 +17,7 @@ import { Tags } from "../models/Tags";
 const unit = require('../utils/sampleUnit');
 
 const getAll = catchAsync(async (req: any, res: any) => {
-  const selectedWorkbooks = await Workbook.find({ 
+  const selectedWorkbooks = await Workbook.find({
     where: {
       author: req.currentUser,
       IsDeleted:false
@@ -40,7 +40,38 @@ const get = catchAsync(async (req: any, res: any) => {
 const post = catchAsync(async (req: any, res: any) => {
   let { title, published, edition, language, price, currency, status, tags, description, image } = req.body;
 
+  const allTags = await Tags.find({}).catch((error) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  });
+
+  let tagsExist = allTags.map(a => a.name)
+
   const workbook = new Workbook();
+
+  let tagsNew = tags.filter((e:any) =>  tagsExist.indexOf(e) === -1 );
+
+  let tagsOld = tags.filter((e:any) =>  tagsExist.includes(e));
+
+
+  workbook.tags = []
+
+  for (let i = 0; i < tagsNew.length; i++) {
+    const newTag = new Tags();
+    newTag.name = tagsNew[i].charAt(0).toUpperCase() + tagsNew[i].slice(1).toLowerCase();
+    await newTag.save()
+    workbook.tags.push(newTag)
+  }
+
+  for (let a = 0; a < tagsOld.length; a++) {
+    const tagsFinded =  await Tags.find({
+      where:{name:tagsOld[a]}
+    }).catch((error) => {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+    });
+    workbook.tags.push(tagsFinded[0])
+  }
+
+
   workbook.title = title;
   workbook.image = image;
   workbook.published = published;
@@ -49,7 +80,6 @@ const post = catchAsync(async (req: any, res: any) => {
   workbook.price = price;
   workbook.currency = currency;
   workbook.status = status;
-  workbook.tags = tags;
   workbook.description = description;
   workbook.author = req.currentUser;
 
@@ -63,11 +93,15 @@ const post = catchAsync(async (req: any, res: any) => {
 
 const put = catchAsync(async (req: any, res: any) => {
 
+  const allTags = await Tags.find({}).catch((error) => {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  });
+
   const selectedWorkbook = await Workbook.findOne({
     where: {
       id: req.params.id
     },
-    relations: ['author']
+    relations: ['author', 'tags']
   });
 
   if(!selectedWorkbook)
@@ -82,7 +116,60 @@ const put = catchAsync(async (req: any, res: any) => {
       "You need to be the author to edit"
     );
 
-  let { title, published, edition, language, price, currency, status, description, image, structure } = req.body;
+  // Take all name tags of the workbook
+
+  let allTagsName = allTags.map(z => z.name)
+
+  let tagsExist = selectedWorkbook?.tags.map(a => a.name)
+
+  let { title, published, edition, language, price, currency, status, description, image, structure, tags } = req.body;
+
+  // Take all tags what i need to add
+
+  let tagsNew = tags.filter((e:any) =>  tagsExist.indexOf(e.name) === -1 )
+
+  let tagsNewName = tagsNew.map((f:any) => f.name)
+
+  if (tagsExist !== tagsNew){
+
+    for (let i = 0; i < tagsNew.length; i++) {
+      let nameUpercase = tagsNew[i].name.charAt(0).toUpperCase() + tagsNew[i].name.slice(1).toLowerCase()
+      console.log(allTagsName)
+      console.log(nameUpercase)
+      console.log(tagsNewName)
+      console.log(allTagsName.indexOf(nameUpercase) !== -1 )
+      console.log(tagsNewName.indexOf(nameUpercase) !== -1 )
+      if ((allTagsName.indexOf(nameUpercase) !== -1) && (tagsNewName.indexOf(nameUpercase) !== -1)) {
+        console.log('entre a los usados ')
+        const tagsFinded =  await Tags.find({
+          where:{name:nameUpercase}
+        }).catch((error) => {
+          throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+        });
+        selectedWorkbook.tags.push(tagsFinded[0])
+      }
+      if (allTagsName.indexOf(nameUpercase) === -1) {
+        console.log('entre a los nuevos')
+        const newTag = new Tags();
+        newTag.name = tagsNew[i].name.charAt(0).toUpperCase() + tagsNew[i].name.slice(1).toLowerCase();
+        await newTag.save()
+        selectedWorkbook.tags.push(newTag)
+      }
+    }
+  }
+  console.log(selectedWorkbook.tags)
+
+  // Take all tags what i need to delete
+
+  let tagsComming = tags.map((e:any) => e.name)
+
+  let tagstodelete = tagsExist.filter(a => tagsComming.indexOf(a) === -1)
+
+  if (tagsExist !== tagstodelete){
+    console.log('entre a los de borrar')
+    selectedWorkbook.tags = selectedWorkbook.tags.filter((x) => tagsComming.indexOf(x.name) !== -1)
+  }
+
 
   selectedWorkbook.title = title;
   selectedWorkbook.image = image;
@@ -95,11 +182,12 @@ const put = catchAsync(async (req: any, res: any) => {
   selectedWorkbook.description = description;
   selectedWorkbook.structure = structure;
 
-  console.log(selectedWorkbook)
 
   let updatedWorkbook = await selectedWorkbook.save().catch((error) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   });
+
+  console.log(updatedWorkbook.tags)
 
   res.status(httpStatus.OK).json(updatedWorkbook);
 });
@@ -271,11 +359,7 @@ const putUnit = catchAsync(async (req: any, res: any) => {
 /* TAGS Controllers */
 
 const getAllTags = catchAsync(async (req: any, res: any) => {
-  const allTags = await Tags.find({
-    order: {
-        name: "DESC",
-    }
-}).catch((error) => {
+  const allTags = await Tags.find({}).catch((error) => {
   throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
 });;
 
@@ -302,7 +386,7 @@ if(!selectedWorkbook)
 })
 
 
-const putTags = catchAsync(async (req: any, res: any) => {
+/* const putTags = catchAsync(async (req: any, res: any) => {
   const selectedWorkbook = await Workbook.findOne({
     where: {
       id: req.params.id
@@ -336,7 +420,7 @@ const putTags = catchAsync(async (req: any, res: any) => {
   });
 
   res.status(httpStatus.OK).json(updatedWorkbook);
-})
+}) */
 
 module.exports = {
   getAll,
@@ -347,6 +431,6 @@ module.exports = {
   getUnitAll,
   postUnit,
   putUnit,
-  getAllTags,
-  putTags
+  getAllTags
+  /* putTags */
 };
