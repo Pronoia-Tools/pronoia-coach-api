@@ -288,6 +288,7 @@ const login = catchAsync(async (req: any, res: any) => {
 
 const refresh = catchAsync(async (req: any, res: any) => {
   let customTokenAuthFirebase = ""
+  const auth = getAuth()
   const admin = require("../config/firebaseAdmin").firebase_admin_connect();
   await admin.auth().createCustomToken(req.currentUser.uuid)
     .then((resCustomToken:any) => {
@@ -298,9 +299,12 @@ const refresh = catchAsync(async (req: any, res: any) => {
     .catch((error:any) => {
       console.log('Error creating custom token:', error);
     });
+
+    const refresh = await auth.currentUser.getIdToken()
+    console.log(refresh)
   res.status(httpStatus.OK).json({
     user: pick(req.currentUser, ["firstName", "lastName", "email", "country","businessname", "authorized"]),
-    token: req.get('authorization').replace('Bearer ', ''),
+    token: refresh,
     customTokenAuthFirebase
   });
 });
