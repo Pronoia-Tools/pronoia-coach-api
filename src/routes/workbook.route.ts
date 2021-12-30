@@ -5,7 +5,6 @@ const router = express.Router();
 const auth = require("../middlewares/auth");
 
 router.get("/", auth(), workbookController.getAll);
-router.get("/public", auth(), workbookController.getPublicWorkbooks);
 router.post("/", auth(), workbookController.post);
 router.get("/:id", auth(), workbookController.get);
 router.put("/:id", auth(), workbookController.put);

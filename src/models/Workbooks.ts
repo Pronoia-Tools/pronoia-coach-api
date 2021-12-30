@@ -50,9 +50,6 @@ export class Workbook extends BaseEntity {
   @Column('boolean', {default: false})
   IsDeleted: boolean = false;
 
-  @Column('boolean', {default: false})
-  isPublic: boolean = false;
-
   @Column("json", { nullable: false, default: {tree: []} })
   structure: StructureObject;
 

@@ -27,17 +27,6 @@ const getAll = catchAsync(async (req: any, res: any) => {
   res.status(httpStatus.OK).json(selectedWorkbooks);
 });
 
-const getPublicWorkbooks = catchAsync(async (req: any, res: any) => {
-  const selectedWorkbooks = await Workbook.find({ 
-    where: {
-      isPublic:true,
-      IsDeleted:false
-    },
-    relations: ['author']
-  });
-  res.status(httpStatus.OK).json(selectedWorkbooks);
-});
-
 const get = catchAsync(async (req: any, res: any) => {
   const selectedWorkbook = await Workbook.findOne({
     where:{
@@ -359,6 +348,5 @@ module.exports = {
   postUnit,
   putUnit,
   getAllTags,
-  putTags,
-  getPublicWorkbooks
+  putTags
 };
